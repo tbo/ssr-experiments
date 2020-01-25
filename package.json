@@ -1,0 +1,31 @@
+{
+  "name": "nodejs-hpa",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev": "TSC_WATCHFILE=UseFsEvents ts-node-dev src/server",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tbo/nodejs-hpa.git"
+  },
+  "author": "Thomas Bonk",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/tbo/nodejs-hpa/issues"
+  },
+  "homepage": "https://github.com/tbo/nodejs-hpa#readme",
+  "dependencies": {
+    "fastify": "^2.11.0"
+  },
+  "devDependencies": {
+    "@types/node": "^13.5.0",
+    "@typescript-eslint/eslint-plugin": "^2.17.0",
+    "@typescript-eslint/parser": "^2.17.0",
+    "eslint": "^6.8.0",
+    "ts-node-dev": "^1.0.0-pre.44",
+    "typescript": "^3.7.5"
+  }
+}
