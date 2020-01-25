@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "TSC_WATCHFILE=UseFsEvents ts-node-dev src/server",
+    "dev": "TSC_WATCHFILE=UseFsEvents ts-node-dev --no-notify src/server",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -18,7 +18,10 @@
   },
   "homepage": "https://github.com/tbo/nodejs-hpa#readme",
   "dependencies": {
-    "fastify": "^2.11.0"
+    "fastify": "^2.11.0",
+    "fastify-static": "^2.5.1",
+    "handlebars": "^4.7.2",
+    "point-of-view": "^3.7.1"
   },
   "devDependencies": {
     "@types/node": "^13.5.0",
