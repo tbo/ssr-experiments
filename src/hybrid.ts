@@ -46,13 +46,13 @@ const handleSubmit = async (event: Event) => {
   event.preventDefault();
   const form = event.target as HTMLFormElement;
   const query = new URLSearchParams(new FormData(form) as any).toString();
-  const targetUrl = form.action + query ? '?' + query : '';
+  const targetUrl = form.action + (query ? '?' + query : '');
   await handleTransition(targetUrl);
   window.history.pushState(null, document.title, targetUrl);
 };
 
 document.addEventListener('DOMContentLoaded', function() {
   document.querySelectorAll('a:not([href*="://"]').forEach(link => link.addEventListener('click', handleClick));
-  document.querySelectorAll('form:not([action*="://"]').forEach(link => link.addEventListener('submit', handleSubmit));
+  document.querySelectorAll('form:not([action*="://"]').forEach(form => form.addEventListener('submit', handleSubmit));
   window.onpopstate = (event: PopStateEvent) => handleTransition((event?.target as Window).location.href);
 });

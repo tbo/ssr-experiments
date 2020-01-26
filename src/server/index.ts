@@ -18,8 +18,8 @@ app
       },
     },
   })
-  .get('/', (_request, reply) => {
-    setTimeout(() => reply.view('/src/templates/search.hbs'), 500);
+  .get('/', (request, reply) => {
+    reply.view('/src/templates/search.hbs', { query: request.query.query });
   })
   .get('/examples', (_request, reply) => {
     setTimeout(() => reply.view('/src/templates/examples.hbs'), 500);
