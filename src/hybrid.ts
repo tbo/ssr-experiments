@@ -17,7 +17,10 @@ const morphdomOptions = {
     return added;
   },
   onBeforeElUpdated: (fromEl: Node, toEl: Node) => !fromEl.isEqualNode(toEl),
-  onNodeDiscarded: (discarded: Node) => discarded.removeEventListener('click', handleClick),
+  onNodeDiscarded: (discarded: Node) => {
+    discarded.removeEventListener('click', handleClick);
+    discarded.removeEventListener('submit', handleSubmit);
+  },
 };
 
 const handleTransition = async (targetUrl: string) => {
