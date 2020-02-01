@@ -1,13 +1,11 @@
 import morphdom from 'morphdom';
 
-const fetchOptions: RequestInit = {
-  credentials: 'same-origin',
-  redirect: 'follow',
-};
-
 const isLink = (node: Node): node is HTMLAnchorElement => node.nodeName === 'A';
 
 const isLocalLink = (node: Node): boolean => isLink(node) && !~node.href?.indexOf('://');
+
+const isTextInput = (node: Node): node is HTMLInputElement =>
+  node.nodeName === 'INPUT' && ['email', 'text', 'password'].includes((node as HTMLInputElement).type);
 
 const morphdomOptions = {
   onBeforeNodeAdded: (added: Node) => {
@@ -16,23 +14,41 @@ const morphdomOptions = {
     }
     return added;
   },
-  onBeforeElUpdated: (fromEl: Node, toEl: Node) => !fromEl.isEqualNode(toEl),
-  onNodeDiscarded: (discarded: Node) => {
-    discarded.removeEventListener('click', handleClick);
-    discarded.removeEventListener('submit', handleSubmit);
+  onBeforeElUpdated: (fromEl: Node, toEl: Node) => {
+    if (
+      fromEl === document.activeElement &&
+      isTextInput(fromEl) &&
+      isTextInput(toEl) &&
+      fromEl.value !== fromEl.getAttribute('value')
+    ) {
+      return false;
+    }
+    return !fromEl.isEqualNode(toEl);
   },
 };
 
+let abortController: AbortController | null = null;
+
+const parser = new DOMParser();
 const handleTransition = async (targetUrl: string) => {
+  abortController?.abort();
+  abortController = new AbortController();
   document.body.classList.add('is-loading');
   try {
-    const response = await fetch(targetUrl, fetchOptions);
-    morphdom(document.documentElement, await response.text(), morphdomOptions);
-  } catch {
-    console.error(`Unable to resolve "${targetUrl}". Doing hard load instead...`);
-    window.location.href = targetUrl;
+    const response = await fetch(targetUrl, {
+      credentials: 'same-origin',
+      redirect: 'follow',
+      signal: abortController.signal,
+    });
+    const stuff = await response.text();
+    const doc = parser.parseFromString(stuff, 'text/html');
+    morphdom(document.documentElement, doc.documentElement, morphdomOptions);
+  } catch (error) {
+    if (error.name !== 'AbortError') {
+      console.error(error, `Unable to resolve "${targetUrl}". Doing hard load instead...`);
+      window.location.href = targetUrl;
+    }
   }
-  document.body.classList.remove('is-loading');
 };
 
 const handleClick = async (event: Event) => {
@@ -50,6 +66,35 @@ const handleSubmit = async (event: Event) => {
   await handleTransition(targetUrl);
   window.history.pushState(null, document.title, targetUrl);
 };
+
+class SearchBar extends HTMLElement {
+  constructor() {
+    super();
+    const defaultSlot = document.createElement('slot');
+    // const displaySlot = document.createElement('span');
+    // defaultSlot.style.display = 'none';
+    // displaySlot.setAttribute('name', 'display');
+    const shadowRoot = this.attachShadow({ mode: 'open' });
+    shadowRoot.appendChild(defaultSlot);
+    // displaySlot.innerHTML = 'test';
+
+    // shadowRoot.appendChild(defaultSlot);
+    // shadowRoot.appendChild(displaySlot);
+    // console.dir(this.innerHTML);
+    // const morph = () => (displaySlot = defaultSlot.innerHTML);
+    // const observer = new MutationObserver(update);
+    // slot.addEventListener('slotchange', () =>
+    //   slot
+    //     .assignedNodes()
+    //     .forEach(node => observer.observe(node, { attributes: true, childList: true, subtree: true })),
+    // );
+    // morphdom(shadowRoot, this);
+    // console.log('morphing');
+    // morph();
+  }
+}
+
+window.customElements.define('search-bar', SearchBar);
 
 document.addEventListener('DOMContentLoaded', function() {
   document.querySelectorAll('a:not([href*="://"]').forEach(link => link.addEventListener('click', handleClick));

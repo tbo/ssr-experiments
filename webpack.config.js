@@ -12,7 +12,7 @@ module.exports = {
       {
         test: /\.ts$/,
         exclude: /(node_modules|bower_components)/,
-        use: { loader: 'swc-loader' },
+        use: { loader: 'ts-loader' },
       },
     ],
   },

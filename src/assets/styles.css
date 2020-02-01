@@ -1,3 +1,6 @@
+* {
+  box-sizing: border-box;
+}
 @font-face {
   font-family: 'Material Icons';
   font-style: normal;
@@ -30,4 +33,30 @@ body {
 
 body.is-loading {
   opacity: 0.75;
+}
+
+.hits {
+  display: grid;
+  grid-gap: 50px;
+  grid-template-columns: repeat(5, 1fr);
+}
+.hit {
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+}
+
+.hit img {
+  max-width: 100%;
+  padding: 20px;
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: auto;
+}
+
+.image-wrapper {
+  position: relative;
+  height: 0;
+  padding-top: 100%;
 }

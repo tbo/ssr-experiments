@@ -3,20 +3,37 @@
   <div class="col s12 ">
     <div class="row" id="topbarsearch">
       <div class="input-field col s6 s12 red-text">
-        <i class="red-text material-icons prefix">search</i>
-        <input
-          type="text"
-          placeholder="search"
-          id="autocomplete-input"
-          name="query"
-          class="autocomplete red-text"
-          onkeyup="this.form.dispatchEvent(new Event('submit'))"
-          autocomplete="off"
-          value="{{ query }}"
-        />
+        <search-bar>
+          <i class="red-text material-icons prefix">search</i>
+          <input
+            type="text"
+            placeholder="search"
+            id="autocomplete-input"
+            name="query"
+            class="autocomplete red-text"
+            oninput="this.form.dispatchEvent(new Event('submit'))"
+            autocomplete="off"
+            value="{{ query }}"
+            autofocus
+          />
+        </search-bar>
       </div>
     </div>
   </div>
 </form>
-{{ query }}
+{{#if searchResult }}
+Hits: {{ searchResult.nbHits }}
+<div class="hits">
+  {{#each searchResult.hits}}
+    <div  id="{{ ikea_id }}" class="card blue-grey darken-1 hit">
+      <div class="card-content white-text">
+        <span class="card-title">{{ name }}</span>
+      </div>
+      <div class="image-wrapper">
+        <image src="{{ image }}"/>
+      </div>
+    </div>
+  {{/each}}
+</div>
+{{/if }}
 {{> footer }}
