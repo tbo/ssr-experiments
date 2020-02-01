@@ -28,6 +28,7 @@ body {
   margin-right: auto;
   margin-left: auto;
   max-width: 1600px;
+  padding: 0 50px;
   transition: opacity 150ms ease-in 16ms;
 }
 
@@ -65,4 +66,9 @@ body.is-loading {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.pagination {
+  text-align: center;
+  margin: 50px 0;
 }

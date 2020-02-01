@@ -8,16 +8,16 @@ const isTextInput = (node: Node): node is HTMLInputElement =>
   node.nodeName === 'INPUT' && ['email', 'text', 'password'].includes((node as HTMLInputElement).type);
 
 const morphdomOptions = {
-  onBeforeElUpdated: (fromEl: Node, toEl: Node) => {
+  onBeforeElUpdated: (from: Node, to: Node) => {
     if (
-      fromEl === document.activeElement &&
-      isTextInput(fromEl) &&
-      isTextInput(toEl) &&
-      fromEl.value !== fromEl.getAttribute('value')
+      from === document.activeElement &&
+      isTextInput(from) &&
+      isTextInput(to) &&
+      from.value !== from.getAttribute('value')
     ) {
       return false;
     }
-    return !fromEl.isEqualNode(toEl);
+    return !from.isEqualNode(to);
   },
 };
 
@@ -44,13 +44,16 @@ const handleTransition = async (targetUrl: string) => {
   }
 };
 
+const navigateTo = async (targetUrl: string) => {
+  await handleTransition(targetUrl);
+  window.history.pushState(null, document.title, targetUrl);
+  window.scrollTo(0, 0);
+};
+
 const handleClick = async (event: Event) => {
   if (event?.target && isLocalLink(event.target as Node)) {
-    console.log('detected');
     event.preventDefault();
-    const targetUrl = (event.target as HTMLAnchorElement).href;
-    await handleTransition(targetUrl);
-    window.history.pushState(null, document.title, targetUrl);
+    await navigateTo((event.target as HTMLAnchorElement).href);
   }
 };
 
@@ -58,9 +61,7 @@ const handleSubmit = async (event: Event) => {
   event.preventDefault();
   const form = event.target as HTMLFormElement;
   const query = new URLSearchParams(new FormData(form) as any).toString();
-  const targetUrl = form.action + (query ? '?' + query : '');
-  await handleTransition(targetUrl);
-  window.history.pushState(null, document.title, targetUrl);
+  await navigateTo(form.action + (query ? '?' + query : ''));
 };
 
 document.addEventListener('DOMContentLoaded', function() {
