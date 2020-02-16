@@ -4,6 +4,9 @@ import handlebars from 'handlebars';
 import fastifyStatic from 'fastify-static';
 import path from 'path';
 import { Client } from 'undici';
+import { Stream } from 'stream';
+import replaceStream from 'replacestream';
+import compress from 'fastify-compress';
 
 const algolia = new Client('https://latency-dsn.algolia.net');
 
@@ -18,7 +21,7 @@ const search = (query: string, page = 0): Promise<string | undefined> =>
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          requests: [{ indexName: 'ikea', params: `query=${query}&hitsPerPage=50&page=${page}` }],
+          requests: [{ indexName: 'ikea', params: `query=${query}&hitsPerPage=150&page=${page}` }],
         }),
       },
       (error: Error | undefined, { statusCode, body }: any) => {
@@ -48,6 +51,8 @@ app
       },
     },
   })
+  .register(compress)
+  .register(fastifyStatic, { root: path.join(__dirname, '../assets'), prefix: '/assets' })
   .get('/', async (request, reply) => {
     const { query } = request.query;
     const params: Record<string, any> = { query };
@@ -71,10 +76,15 @@ app
   .get('/examples', (_request, reply) => {
     setTimeout(() => reply.view('/src/templates/examples.hbs'), 500);
   })
-  .register(fastifyStatic, { root: path.join(__dirname, '../assets') })
   .addHook('onSend', async (_request, reply, payload) => {
-    if (reply.getHeader('Content-type')?.startsWith('text/html') && typeof payload === 'string') {
-      return payload.replace('</body>', '<script src="/hybrid.js"></script></body>');
+    if (reply.getHeader('Content-type')?.startsWith('text/html')) {
+      const inject = '<script src="/assets/hybrid.js"></script>';
+      reply.removeHeader('content-length');
+      if (typeof payload === 'string') {
+        return payload.replace('</body>', inject + '</body>');
+      } else if (payload instanceof Stream) {
+        return payload.pipe(replaceStream('</body>', inject + '</body>'));
+      }
     }
     return payload;
   })

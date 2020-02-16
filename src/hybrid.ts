@@ -1,8 +1,15 @@
 import morphdom from 'morphdom';
+import nanomorph from 'nanomorph';
 
-const isLink = (node: Node): node is HTMLAnchorElement => node.nodeName === 'A';
+const ENGINE = 'morphdom' as 'morphdom' | 'nanomorph';
 
-const isLocalLink = (node: Node): boolean => isLink(node) && !~(node?.getAttribute?.('href') ?? '').indexOf('://');
+const isLocalLink = (node: Node): boolean => {
+  let linkNode = node;
+  while (linkNode && linkNode.nodeName !== 'A') {
+    linkNode = linkNode.parentNode as Node;
+  }
+  return linkNode && !~((linkNode as HTMLAnchorElement).getAttribute?.('href') ?? '').indexOf('://');
+};
 
 const isTextInput = (node: Node): node is HTMLInputElement =>
   node.nodeName === 'INPUT' && ['email', 'text', 'password'].includes((node as HTMLInputElement).type);
@@ -34,8 +41,19 @@ const handleTransition = async (targetUrl: string) => {
       redirect: 'follow',
       signal: abortController.signal,
     });
-    const doc = parser.parseFromString(await response.text(), 'text/html');
-    morphdom(document.documentElement, doc.documentElement, morphdomOptions);
+    const text = await response.text();
+    const start = performance.now();
+    const doc = parser.parseFromString(text, 'text/html');
+    switch (ENGINE) {
+      case 'nanomorph':
+        nanomorph(document.documentElement, doc.documentElement);
+        break;
+      case 'morphdom':
+        morphdom(document.documentElement, doc.documentElement, morphdomOptions);
+        break;
+    }
+    const end = performance.now();
+    console.info('Transition took', end - start);
   } catch (error) {
     if (error.name !== 'AbortError') {
       console.error(error, `Unable to resolve "${targetUrl}". Doing hard load instead...`);
@@ -53,7 +71,7 @@ const navigateTo = async (targetUrl: string) => {
 const handleClick = async (event: Event) => {
   if (event?.target && isLocalLink(event.target as Node)) {
     event.preventDefault();
-    await navigateTo((event.target as HTMLAnchorElement).href);
+    navigateTo((event.target as HTMLAnchorElement).getAttribute('href') ?? '');
   }
 };
 
@@ -63,7 +81,6 @@ const handleSubmit = async (event: Event) => {
   const query = new URLSearchParams(new FormData(form) as any).toString();
   await navigateTo(form.action + (query ? '?' + query : ''));
 };
-
 document.addEventListener('DOMContentLoaded', function() {
   document.addEventListener('click', handleClick);
   document.addEventListener('submit', handleSubmit);
