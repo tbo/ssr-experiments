@@ -1,8 +1,22 @@
 import morphdom from 'morphdom';
 import nanomorph from 'nanomorph';
 import { DiffDOM } from 'diff-dom';
+import * as snabbdom from 'snabbdom';
+import toVNode from 'snabbdom/tovnode';
+import { VNode } from 'snabbdom/vnode';
 
-const ENGINE = 'nanomorph' as 'morphdom' | 'nanomorph' | 'diffdom';
+const patch = snabbdom.init([
+  // Init patch function with chosen modules
+  require('snabbdom/modules/class').default, // makes it easy to toggle classes
+  require('snabbdom/modules/props').default, // for setting properties on DOM elements
+  require('snabbdom/modules/style').default, // handles styling on elements with support for animations
+  require('snabbdom/modules/eventlisteners').default, // attaches event listeners
+  require('snabbdom/modules/attributes').default, // attaches event listeners
+]);
+
+let currentVDom: VNode;
+
+const ENGINE = 'snabbdom' as 'morphdom' | 'nanomorph' | 'diffdom' | 'snabbdom';
 console.info('ENGINE:', ENGINE);
 
 const dd = new DiffDOM();
@@ -64,6 +78,16 @@ const handleTransition = async (targetUrl: string) => {
           console.info('Application took', endApply - startApply);
         }
         break;
+      case 'snabbdom':
+        {
+          const newVDom = toVNode(doc.documentElement);
+          const startApply = performance.now();
+          patch(currentVDom, newVDom);
+          currentVDom = newVDom;
+          const endApply = performance.now();
+          console.info('Application took', endApply - startApply);
+        }
+        break;
     }
     const end = performance.now();
     console.info('Transition took', end - start);
@@ -95,6 +119,7 @@ const handleSubmit = async (event: Event) => {
   await navigateTo(form.action + (query ? '?' + query : ''));
 };
 document.addEventListener('DOMContentLoaded', function() {
+  currentVDom = toVNode(document.documentElement);
   document.addEventListener('click', handleClick);
   document.addEventListener('submit', handleSubmit);
   window.onpopstate = (event: PopStateEvent) => handleTransition((event?.target as Window).location.href);
