@@ -1,7 +1,11 @@
 import morphdom from 'morphdom';
 import nanomorph from 'nanomorph';
+import { DiffDOM } from 'diff-dom';
 
-const ENGINE = 'morphdom' as 'morphdom' | 'nanomorph';
+const ENGINE = 'nanomorph' as 'morphdom' | 'nanomorph' | 'diffdom';
+console.info('ENGINE:', ENGINE);
+
+const dd = new DiffDOM();
 
 const isLocalLink = (node: Node): boolean => {
   let linkNode = node;
@@ -50,6 +54,15 @@ const handleTransition = async (targetUrl: string) => {
         break;
       case 'morphdom':
         morphdom(document.documentElement, doc.documentElement, morphdomOptions);
+        break;
+      case 'diffdom':
+        {
+          const diff = dd.diff(document.documentElement, doc.documentElement);
+          const startApply = performance.now();
+          dd.apply(document.documentElement, diff);
+          const endApply = performance.now();
+          console.info('Application took', endApply - startApply);
+        }
         break;
     }
     const end = performance.now();
