@@ -7,6 +7,7 @@ import { Client } from 'undici';
 import { Stream } from 'stream';
 import replaceStream from 'replacestream';
 import compress from 'fastify-compress';
+import multipart from 'fastify-multipart';
 
 const algolia = new Client('https://latency-dsn.algolia.net');
 
@@ -52,6 +53,7 @@ app
     },
   })
   .register(compress)
+  .register(multipart, { addToBody: true })
   .register(fastifyStatic, { root: path.join(__dirname, '../assets'), prefix: '/assets' })
   .get('/', async (request, reply) => {
     const { query } = request.query;
@@ -72,6 +74,20 @@ app
       }
     }
     reply.view('/src/templates/search.hbs', params);
+  })
+  .get('/post-search', (_request, reply) => {
+    reply.view('/src/templates/post-search.hbs');
+  })
+  .post('/post-search', async (request, reply) => {
+    const { query } = request.body;
+    const params: Record<string, any> = { query };
+    if (query) {
+      const response = await search(query);
+      if (response) {
+        params.searchResult = JSON.parse(response).results[0];
+      }
+    }
+    reply.view('/src/templates/post-search.hbs', params);
   })
   .get('/examples', (_request, reply) => {
     setTimeout(() => reply.view('/src/templates/examples.hbs'), 500);

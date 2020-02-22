@@ -62,12 +62,12 @@ const handleRespone = (request: Request, mode: 'cache' | 'network', cacheRace: A
   if (!response) {
     return;
   }
-  const text = await response.clone().text();
-  const start = performance.now();
   if (response.headers.get('content-type')?.indexOf('text/html') === -1) {
     window.location.href = response.url;
     return;
   }
+  const text = await response.clone().text();
+  const start = performance.now();
   const newDom = parser.parseFromString(text, 'text/html');
   // The cache can be slower, than the network in some rare cases. We abort the
   // rendering of cached responses in those situations to avoid overriding
@@ -112,15 +112,17 @@ const handleRespone = (request: Request, mode: 'cache' | 'network', cacheRace: A
   return response.url;
 };
 
-const handleTransition = async (targetUrl: string) => {
+const handleTransition = async (targetUrl: string, body?: BodyInit) => {
   abortController?.abort();
   abortController = new AbortController();
   const cacheRace = new AbortController();
   document.body.classList.add('is-loading');
   const request = new Request(targetUrl, {
+    method: body ? 'POST' : 'GET',
     credentials: 'same-origin',
     redirect: 'follow',
     signal: abortController.signal,
+    body,
   });
   const cachedTransition = cache
     ?.match(request)
@@ -142,27 +144,32 @@ const handleTransition = async (targetUrl: string) => {
   return getFirstValidResponse([cachedTransition, networkTransition]);
 };
 
-const navigateTo = async (targetUrl: string) => {
+const navigateTo = async (targetUrl: string, body?: BodyInit) => {
   // The final and target URLs can differ due to HTTP redirects.
-  const finalUrl = await handleTransition(targetUrl);
+  const finalUrl = await handleTransition(targetUrl, body);
   if (finalUrl) {
     window.history.pushState(null, document.title, finalUrl);
     window.scrollTo(0, 0);
   }
 };
 
-const handleClick = async (event: Event) => {
+const handleClick = (event: Event) => {
   if (event?.target && isLocalLink(event.target as Node)) {
     event.preventDefault();
     navigateTo((event.target as HTMLAnchorElement).getAttribute('href') ?? '');
   }
 };
 
-const handleSubmit = async (event: Event) => {
+const handleSubmit = (event: Event) => {
   event.preventDefault();
   const form = event.target as HTMLFormElement;
-  const query = new URLSearchParams(new FormData(form) as any).toString();
-  await navigateTo(form.action + (query ? '?' + query : ''));
+  const data = new FormData(form);
+  if (form.method === 'post') {
+    navigateTo(form.action, data);
+  } else {
+    const query = new URLSearchParams(data as any).toString();
+    navigateTo(form.action + (query ? '?' + query : ''));
+  }
 };
 
 document.addEventListener('DOMContentLoaded', function() {
