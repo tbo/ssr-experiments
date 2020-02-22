@@ -16,7 +16,7 @@ const patch = snabbdom.init([
 
 let currentVDom: VNode;
 
-const ENGINE = 'snabbdom' as 'morphdom' | 'nanomorph' | 'diffdom' | 'snabbdom';
+const ENGINE = 'morphdom' as 'morphdom' | 'nanomorph' | 'diffdom' | 'snabbdom';
 console.info('ENGINE:', ENGINE);
 
 const dd = new DiffDOM();
@@ -48,55 +48,58 @@ const morphdomOptions = {
 
 let abortController: AbortController | null = null;
 
+const handleRespone = async (response: Response) => {
+  const text = await response.text();
+  const start = performance.now();
+  const doc = parser.parseFromString(text, 'text/html');
+  switch (ENGINE) {
+    case 'nanomorph':
+      nanomorph(document.documentElement, doc.documentElement);
+      break;
+    case 'morphdom':
+      morphdom(document.documentElement, doc.documentElement, morphdomOptions);
+      break;
+    case 'diffdom':
+      {
+        const diff = dd.diff(document.documentElement, doc.documentElement);
+        const startApply = performance.now();
+        dd.apply(document.documentElement, diff);
+        const endApply = performance.now();
+        console.info('Application took', endApply - startApply);
+      }
+      break;
+    case 'snabbdom':
+      {
+        const newVDom = toVNode(doc.documentElement);
+        const startApply = performance.now();
+        patch(currentVDom, newVDom);
+        currentVDom = newVDom;
+        const endApply = performance.now();
+        console.info('Application took', endApply - startApply);
+      }
+      break;
+  }
+  const end = performance.now();
+  console.info('Transition took', end - start);
+};
+
 const parser = new DOMParser();
 const handleTransition = async (targetUrl: string) => {
   abortController?.abort();
   abortController = new AbortController();
   document.body.classList.add('is-loading');
-  try {
-    const response = await fetch(targetUrl, {
-      credentials: 'same-origin',
-      redirect: 'follow',
-      signal: abortController.signal,
+  return fetch(targetUrl, {
+    credentials: 'same-origin',
+    redirect: 'follow',
+    signal: abortController.signal,
+  })
+    .then(handleRespone)
+    .catch(error => {
+      if (error.name !== 'AbortError') {
+        console.error(error, `Unable to resolve "${targetUrl}". Doing hard load instead...`);
+        window.location.href = targetUrl;
+      }
     });
-    const text = await response.text();
-    const start = performance.now();
-    const doc = parser.parseFromString(text, 'text/html');
-    switch (ENGINE) {
-      case 'nanomorph':
-        nanomorph(document.documentElement, doc.documentElement);
-        break;
-      case 'morphdom':
-        morphdom(document.documentElement, doc.documentElement, morphdomOptions);
-        break;
-      case 'diffdom':
-        {
-          const diff = dd.diff(document.documentElement, doc.documentElement);
-          const startApply = performance.now();
-          dd.apply(document.documentElement, diff);
-          const endApply = performance.now();
-          console.info('Application took', endApply - startApply);
-        }
-        break;
-      case 'snabbdom':
-        {
-          const newVDom = toVNode(doc.documentElement);
-          const startApply = performance.now();
-          patch(currentVDom, newVDom);
-          currentVDom = newVDom;
-          const endApply = performance.now();
-          console.info('Application took', endApply - startApply);
-        }
-        break;
-    }
-    const end = performance.now();
-    console.info('Transition took', end - start);
-  } catch (error) {
-    if (error.name !== 'AbortError') {
-      console.error(error, `Unable to resolve "${targetUrl}". Doing hard load instead...`);
-      window.location.href = targetUrl;
-    }
-  }
 };
 
 const navigateTo = async (targetUrl: string) => {
@@ -118,6 +121,7 @@ const handleSubmit = async (event: Event) => {
   const query = new URLSearchParams(new FormData(form) as any).toString();
   await navigateTo(form.action + (query ? '?' + query : ''));
 };
+
 document.addEventListener('DOMContentLoaded', function() {
   currentVDom = toVNode(document.documentElement);
   document.addEventListener('click', handleClick);
