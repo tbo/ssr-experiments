@@ -62,7 +62,7 @@ const handleRespone = (request: Request, mode: 'cache' | 'network', cacheRace: A
   if (!response) {
     return;
   }
-  const text = await response.text();
+  const text = await response.clone().text();
   const start = performance.now();
   if (response.headers.get('content-type')?.indexOf('text/html') === -1) {
     window.location.href = response.url;
@@ -122,7 +122,15 @@ const handleTransition = async (targetUrl: string) => {
     redirect: 'follow',
     signal: abortController.signal,
   });
-  const cachedTransition = cache?.match(request).then(handleRespone(request, 'cache', cacheRace));
+  const cachedTransition = cache
+    ?.match(request)
+    .then(handleRespone(request, 'cache', cacheRace))
+    .catch(error => {
+      if (error.name !== 'AbortError') {
+        console.error(error, `Unable to resolve "${targetUrl}". Doing hard load instead...`);
+        window.location.href = targetUrl;
+      }
+    });
   const networkTransition = fetch(request)
     .then(handleRespone(request, 'network', cacheRace))
     .catch(error => {
