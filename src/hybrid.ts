@@ -61,13 +61,15 @@ const handleRespone = (mode: 'cache' | 'network', cacheRace: AbortController) =>
   }
   const text = await response.text();
   const start = performance.now();
+  if (response.headers.get('content-type')?.indexOf('text/html') === -1) {
+    window.location.href = response.url;
+    return;
+  }
   const doc = parser.parseFromString(text, 'text/html');
   // The cache can be slower, than the network in some rare cases. We abort the
   // rendering of cached responses in those situations to avoid overriding
   // up-to-date responses with stale data.
   if (cacheRace.signal.aborted) {
-    console.log('abort');
-    console.warn('Cached got aborted');
     return;
   }
   if (mode === 'network') {
@@ -127,8 +129,10 @@ const handleTransition = async (targetUrl: string) => {
 const navigateTo = async (targetUrl: string) => {
   // The final and target URLs can differ due to HTTP redirects.
   const finalUrl = await handleTransition(targetUrl);
-  window.history.pushState(null, document.title, finalUrl || targetUrl);
-  window.scrollTo(0, 0);
+  if (finalUrl) {
+    window.history.pushState(null, document.title, finalUrl);
+    window.scrollTo(0, 0);
+  }
 };
 
 const handleClick = async (event: Event) => {
