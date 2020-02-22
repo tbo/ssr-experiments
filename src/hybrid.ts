@@ -53,7 +53,10 @@ let abortController: AbortController | null = null;
 
 const parser = new DOMParser();
 
-const handleRespone = (mode: 'cache' | 'network', cacheRace: AbortController) => async (
+const getFirstValidResponse = <T>(requests: Promise<T>[]): Promise<T> =>
+  new Promise(resolve => requests.forEach(request => request.then(result => result && resolve(result))));
+
+const handleRespone = (request: Request, mode: 'cache' | 'network', cacheRace: AbortController) => async (
   response: Response | undefined,
 ) => {
   if (!response) {
@@ -65,7 +68,7 @@ const handleRespone = (mode: 'cache' | 'network', cacheRace: AbortController) =>
     window.location.href = response.url;
     return;
   }
-  const doc = parser.parseFromString(text, 'text/html');
+  const newDom = parser.parseFromString(text, 'text/html');
   // The cache can be slower, than the network in some rare cases. We abort the
   // rendering of cached responses in those situations to avoid overriding
   // up-to-date responses with stale data.
@@ -73,17 +76,21 @@ const handleRespone = (mode: 'cache' | 'network', cacheRace: AbortController) =>
     return;
   }
   if (mode === 'network') {
+    cache.put(response.url, response);
+    if (response.status === 301) {
+      cache.put(request.url, response);
+    }
     cacheRace.abort();
   }
   switch (ENGINE) {
     case 'nanomorph':
-      nanomorph(document.documentElement, doc.documentElement);
+      nanomorph(document.documentElement, newDom.documentElement);
       break;
     case 'morphdom':
-      morphdom(document.documentElement, doc.documentElement, morphdomOptions);
+      morphdom(document.documentElement, newDom.documentElement, morphdomOptions);
       break;
     case 'diffdom': {
-      const diff = dd.diff(document.documentElement, doc.documentElement);
+      const diff = dd.diff(document.documentElement, newDom.documentElement);
       const startApply = performance.now();
       dd.apply(document.documentElement, diff);
       const endApply = performance.now();
@@ -91,7 +98,7 @@ const handleRespone = (mode: 'cache' | 'network', cacheRace: AbortController) =>
       break;
     }
     case 'snabbdom': {
-      const newVDom = toVNode(doc.documentElement);
+      const newVDom = toVNode(newDom.documentElement);
       const startApply = performance.now();
       patch(currentVDom, newVDom);
       currentVDom = newVDom;
@@ -110,20 +117,21 @@ const handleTransition = async (targetUrl: string) => {
   abortController = new AbortController();
   const cacheRace = new AbortController();
   document.body.classList.add('is-loading');
-  cache?.add(targetUrl);
-  cache?.match(targetUrl).then(handleRespone('cache', cacheRace));
-  return fetch(targetUrl, {
+  const request = new Request(targetUrl, {
     credentials: 'same-origin',
     redirect: 'follow',
     signal: abortController.signal,
-  })
-    .then(handleRespone('network', cacheRace))
+  });
+  const cachedTransition = cache?.match(request).then(handleRespone(request, 'cache', cacheRace));
+  const networkTransition = fetch(request)
+    .then(handleRespone(request, 'network', cacheRace))
     .catch(error => {
       if (error.name !== 'AbortError') {
         console.error(error, `Unable to resolve "${targetUrl}". Doing hard load instead...`);
         window.location.href = targetUrl;
       }
     });
+  return getFirstValidResponse([cachedTransition, networkTransition]);
 };
 
 const navigateTo = async (targetUrl: string) => {
