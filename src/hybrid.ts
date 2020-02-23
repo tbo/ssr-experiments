@@ -51,37 +51,16 @@ const morphdomOptions = {
 
 let abortController: AbortController | null = null;
 
+let eventSource: EventSource;
+
 const parser = new DOMParser();
 
 const getFirstValidResponse = <T>(requests: Promise<T>[]): Promise<T> =>
   new Promise(resolve => requests.forEach(request => request.then(result => result && resolve(result))));
 
-const handleRespone = (request: Request, mode: 'cache' | 'network', cacheRace: AbortController) => async (
-  response: Response | undefined,
-) => {
-  if (!response) {
-    return;
-  }
-  if (response.headers.get('content-type')?.indexOf('text/html') === -1) {
-    window.location.href = response.url;
-    return;
-  }
-  const text = await response.clone().text();
+const transformDom = (text: string) => {
   const start = performance.now();
   const newDom = parser.parseFromString(text, 'text/html');
-  // The cache can be slower, than the network in some rare cases. We abort the
-  // rendering of cached responses in those situations to avoid overriding
-  // up-to-date responses with stale data.
-  if (cacheRace.signal.aborted) {
-    return;
-  }
-  if (mode === 'network') {
-    cache.put(response.url, response);
-    if (response.status === 301) {
-      cache.put(request.url, response);
-    }
-    cacheRace.abort();
-  }
   switch (ENGINE) {
     case 'nanomorph':
       nanomorph(document.documentElement, newDom.documentElement);
@@ -109,10 +88,46 @@ const handleRespone = (request: Request, mode: 'cache' | 'network', cacheRace: A
   }
   const end = performance.now();
   console.info('Transition took', end - start);
+};
+
+const tryEventSource = (url: string) => {
+  eventSource = new EventSource(url);
+  eventSource.onmessage = event => transformDom(event.data);
+  (abortController ?? (abortController = new AbortController())).signal.addEventListener('abort', () =>
+    eventSource.close(),
+  );
+};
+
+const handleRespone = (request: Request, mode: 'cache' | 'network', cacheRace: AbortController) => async (
+  response: Response | undefined,
+) => {
+  if (!response) {
+    return;
+  }
+  // The cache can be slower, than the network in some rare cases. We abort the
+  // rendering of cached responses in those situations to avoid overriding
+  // up-to-date responses with stale data.
+  if (cacheRace.signal.aborted) {
+    return;
+  }
+  if (response.headers.get('content-type')?.indexOf('text/html') === -1) {
+    abortController?.abort();
+    window.location.href = response.url;
+    return;
+  }
+  if (mode === 'network') {
+    cache.put(response.url, response.clone());
+    if (response.status === 301) {
+      cache.put(request.url, response.clone());
+    }
+    cacheRace.abort();
+    tryEventSource(response.url);
+  }
+  response.text().then(transformDom);
   return response.url;
 };
 
-const handleTransition = async (targetUrl: string, body?: BodyInit) => {
+const handleTransition = (targetUrl: string, body?: BodyInit) => {
   abortController?.abort();
   abortController = new AbortController();
   const cacheRace = new AbortController();
@@ -177,4 +192,5 @@ document.addEventListener('DOMContentLoaded', function() {
   document.addEventListener('click', handleClick);
   document.addEventListener('submit', handleSubmit);
   window.onpopstate = (event: PopStateEvent) => handleTransition((event?.target as Window).location.href);
+  tryEventSource(window.location.href);
 });

@@ -8,7 +8,10 @@ import { Stream } from 'stream';
 import replaceStream from 'replacestream';
 import compress from 'fastify-compress';
 import multipart from 'fastify-multipart';
+import StreamSSE from 'ssestream2';
+import { readFileSync } from 'fs';
 
+const timeTemplate = handlebars.compile(readFileSync('./src/templates/time.hbs', 'utf-8'));
 const algolia = new Client('https://latency-dsn.algolia.net');
 
 const getRange = (to: number) => [...Array(to).keys()];
@@ -41,6 +44,16 @@ const search = (query: string, page = 0): Promise<string | undefined> =>
 const app = fastify({ logger: false });
 
 app
+  .addHook('preHandler', function(request, reply, next) {
+    if (request.headers.accept?.startsWith('text/event-stream') && request.raw.url !== '/time') {
+      reply
+        .header('content-type', 'text/event-stream')
+        .code(200)
+        .send('');
+      return;
+    }
+    next();
+  })
   .register(pointOfView, {
     engine: {
       handlebars,
@@ -91,6 +104,25 @@ app
   })
   .get('/examples', (_request, reply) => {
     setTimeout(() => reply.view('/src/templates/examples.hbs'), 500);
+  })
+  .get('/time', (request, reply) => {
+    const getParams = () => ({ time: new Date() });
+    if (request.headers.accept.startsWith('text/event-stream')) {
+      reply.header('content-type', 'text/event-stream');
+      const sse = new StreamSSE(request.raw, {
+        'Access-Control-Allow-Origin': '*',
+      });
+      setInterval(
+        () =>
+          sse.write({
+            data: timeTemplate(getParams()),
+          }),
+        1000,
+      );
+      sse.pipe(reply.res);
+    } else {
+      reply.view('/src/templates/time.hbs', getParams());
+    }
   })
   .addHook('onSend', async (_request, reply, payload) => {
     if (reply.getHeader('Content-type')?.startsWith('text/html')) {
