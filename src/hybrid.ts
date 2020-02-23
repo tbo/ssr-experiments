@@ -115,15 +115,20 @@ const handleRespone = (request: Request, mode: 'cache' | 'network', cacheRace: A
     window.location.href = response.url;
     return;
   }
+  await response
+    .clone()
+    .text()
+    .then(transformDom);
   if (mode === 'network') {
-    cache.put(response.url, response.clone());
+    // Aborting requests of cached responses will lead to uncaught exceptions
+    abortController = null;
+    cache.put(response.url, response);
     if (response.status === 301) {
-      cache.put(request.url, response.clone());
+      cache.put(request.url, response);
     }
     cacheRace.abort();
     tryEventSource(response.url);
   }
-  await response.text().then(transformDom);
   return response.url;
 };
 
