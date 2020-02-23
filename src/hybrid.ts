@@ -123,7 +123,7 @@ const handleRespone = (request: Request, mode: 'cache' | 'network', cacheRace: A
     cacheRace.abort();
     tryEventSource(response.url);
   }
-  response.text().then(transformDom);
+  await response.text().then(transformDom);
   return response.url;
 };
 
@@ -139,15 +139,7 @@ const handleTransition = (targetUrl: string, body?: BodyInit) => {
     signal: abortController.signal,
     body,
   });
-  const cachedTransition = cache
-    ?.match(request)
-    .then(handleRespone(request, 'cache', cacheRace))
-    .catch(error => {
-      if (error.name !== 'AbortError') {
-        console.error(error, `Unable to resolve "${targetUrl}". Doing hard load instead...`);
-        window.location.href = targetUrl;
-      }
-    });
+  const cachedTransition = cache?.match(request).then(handleRespone(request, 'cache', cacheRace));
   const networkTransition = fetch(request)
     .then(handleRespone(request, 'network', cacheRace))
     .catch(error => {

@@ -48,7 +48,7 @@ app
     if (request.headers.accept?.startsWith('text/event-stream') && request.raw.url !== '/time') {
       reply
         .header('content-type', 'text/event-stream')
-        .code(200)
+        .code(204)
         .send('');
       return;
     }
