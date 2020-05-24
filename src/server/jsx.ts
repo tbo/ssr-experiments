@@ -1,4 +1,8 @@
-(global as any).createElement = (type: any, props: Record<string, any> | undefined, ...children: any[]): Element => ({
+(global as any).createElement = (
+  type: any,
+  props: Record<string, any> | undefined,
+  ...children: any[]
+): Promise<Element> | Element => ({
   type,
   props,
   children,
@@ -28,7 +32,7 @@ const toString = (attribute: [string, any]) => {
 type Node = JSX.Element | Promise<Element | string> | Element | string;
 
 export const render = async (root: Node, context?: any): Promise<string> => {
-  const transform = (node: Node | Node[]): string | Promise<string> => {
+  const transform = (node: any): string | Promise<string> => {
     if (typeof node === 'string') {
       return node;
     } else if (node instanceof Promise) {

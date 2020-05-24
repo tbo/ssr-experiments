@@ -12,7 +12,6 @@ import StreamSSE from 'ssestream2';
 import { readFileSync } from 'fs';
 import Example from './components/example';
 import { render } from './jsx';
-import Base from './components/base';
 import Category from './pages/category';
 
 const timeTemplate = handlebars.compile(readFileSync('./src/templates/time.hbs', 'utf-8'));
