@@ -10,6 +10,8 @@ import compress from 'fastify-compress';
 import multipart from 'fastify-multipart';
 import StreamSSE from 'ssestream2';
 import { readFileSync } from 'fs';
+import Example from './components/example';
+import { render } from './jsx';
 
 const timeTemplate = handlebars.compile(readFileSync('./src/templates/time.hbs', 'utf-8'));
 const algolia = new Client('https://latency-dsn.algolia.net');
@@ -44,12 +46,9 @@ const search = (query: string, page = 0): Promise<string | undefined> =>
 const app = fastify({ logger: false });
 
 app
-  .addHook('preHandler', function(request, reply, next) {
+  .addHook('preHandler', function (request, reply, next) {
     if (request.headers.accept?.startsWith('text/event-stream') && request.raw.url !== '/time') {
-      reply
-        .header('content-type', 'text/event-stream')
-        .code(204)
-        .send('');
+      reply.header('content-type', 'text/event-stream').code(204).send('');
       return;
     }
     next();
@@ -78,7 +77,7 @@ app
         params.searchResult = JSON.parse(response).results[0];
         const pages = params.searchResult.nbPages;
         if (pages > 0) {
-          params.pages = getRange(pages).map(page => ({
+          params.pages = getRange(pages).map((page) => ({
             active: activePage === page,
             label: page + 1,
             url: `/?query=${query}&page=${page}`,
@@ -87,6 +86,9 @@ app
       }
     }
     reply.view('/src/templates/search.hbs', params);
+  })
+  .get('/test', async (request, reply) => {
+    return render(Example(), { request, reply });
   })
   .get('/post-search', (_request, reply) => {
     reply.view('/src/templates/post-search.hbs');
@@ -101,9 +103,6 @@ app
       }
     }
     reply.view('/src/templates/post-search.hbs', params);
-  })
-  .get('/examples', (_request, reply) => {
-    setTimeout(() => reply.view('/src/templates/examples.hbs'), 500);
   })
   .get('/time', (request, reply) => {
     const getParams = () => ({ time: new Date() });
@@ -137,7 +136,7 @@ app
     return payload;
   })
   .listen(3000)
-  .catch(error => {
+  .catch((error) => {
     app.log.error(error);
     process.exit(1);
   });

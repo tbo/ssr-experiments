@@ -6,6 +6,7 @@ module.exports = {
     'eslint:recommended',
     'plugin:@typescript-eslint/eslint-recommended',
     'plugin:@typescript-eslint/recommended',
+    'plugin:react/recommended',
   ],
   env: {
     browser: true,
@@ -16,7 +17,9 @@ module.exports = {
       files: ['*.ts', '*.tsx'],
       rules: {
         'no-debugger': 'warn',
+        'react/react-in-jsx-scope': 'off',
         '@typescript-eslint/explicit-function-return-type': 'off',
+        '@typescript-eslint/explicit-module-boundary-types': 'off',
         '@typescript-eslint/no-explicit-any': 'off',
         '@typescript-eslint/no-use-before-define': 'off',
       },
