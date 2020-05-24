@@ -12,6 +12,8 @@ import StreamSSE from 'ssestream2';
 import { readFileSync } from 'fs';
 import Example from './components/example';
 import { render } from './jsx';
+import Base from './components/base';
+import Category from './pages/category';
 
 const timeTemplate = handlebars.compile(readFileSync('./src/templates/time.hbs', 'utf-8'));
 const algolia = new Client('https://latency-dsn.algolia.net');
@@ -89,6 +91,9 @@ app
   })
   .get('/test', async (request, reply) => {
     return render(Example(), { request, reply });
+  })
+  .get('/products/:category', async (request, reply) => {
+    return render(Category(), { request, reply });
   })
   .get('/post-search', (_request, reply) => {
     reply.view('/src/templates/post-search.hbs');
