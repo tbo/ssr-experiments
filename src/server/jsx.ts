@@ -31,14 +31,14 @@ const toString = (attribute: [string, any]) => {
 
 type Node = JSX.Element | Promise<Element | string> | Element | string;
 
-export const render = async (root: Node, context?: any): Promise<string> => {
-  const transform = (node: any): string | Promise<string> => {
-    if (typeof node === 'string') {
+export const render = async (RootComponent: (context: any) => Node, context?: any): Promise<string | number> => {
+  const transform = (node: any): string | number | Promise<string | number> => {
+    if (typeof node === 'string' || typeof node === 'number') {
       return node;
     } else if (node instanceof Promise) {
       return node.then(transform);
     } else if (Array.isArray(node)) {
-      return Promise.all(node.map(transform)).then((children) => children.join(''));
+      return Promise.all(node.filter((child) => child != null).map(transform)).then((children) => children.join(''));
     }
     const { type, props, children } = node as Element;
     if (typeof node.type === 'function') {
@@ -58,5 +58,5 @@ export const render = async (root: Node, context?: any): Promise<string> => {
   };
 
   context.reply.header('content-type', 'text/html');
-  return '<!DOCTYPE html>' + (await transform(root));
+  return '<!DOCTYPE html>' + (await transform(await RootComponent(context)));
 };

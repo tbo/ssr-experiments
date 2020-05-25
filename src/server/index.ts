@@ -3,7 +3,6 @@ import pointOfView from 'point-of-view';
 import handlebars from 'handlebars';
 import fastifyStatic from 'fastify-static';
 import path from 'path';
-import { Client } from 'undici';
 import { Stream } from 'stream';
 import replaceStream from 'replacestream';
 import compress from 'fastify-compress';
@@ -13,38 +12,14 @@ import { readFileSync } from 'fs';
 import Example from './components/example';
 import { render } from './jsx';
 import Category from './pages/category';
+import { search } from './utilities/algolia';
+import fastifyErrorPage from 'fastify-error-page';
 
 const timeTemplate = handlebars.compile(readFileSync('./src/templates/time.hbs', 'utf-8'));
-const algolia = new Client('https://latency-dsn.algolia.net');
 
 const getRange = (to: number) => [...Array(to).keys()];
 
-const search = (query: string, page = 0): Promise<string | undefined> =>
-  new Promise((resolve, reject) =>
-    algolia.request(
-      {
-        path:
-          '/1/indexes/*/queries?x-algolia-api-key=6be0576ff61c053d5f9a3225e2a90f76&x-algolia-application-id=latency',
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          requests: [{ indexName: 'ikea', params: `query=${query}&hitsPerPage=150&page=${page}` }],
-        }),
-      },
-      (error: Error | undefined, { statusCode, body }: any) => {
-        if (error || statusCode >= 400) {
-          return reject(error);
-        }
-        body.setEncoding('utf8');
-        let response = '';
-
-        body.on('data', (chunk: string) => (response += chunk));
-        body.on('end', () => resolve(response));
-      },
-    ),
-  );
-
-const app = fastify({ logger: false });
+const app = fastify({ logger: true });
 
 app
   .addHook('preHandler', function (request, reply, next) {
@@ -54,6 +29,7 @@ app
     }
     next();
   })
+  .register(fastifyErrorPage)
   .register(pointOfView, {
     engine: {
       handlebars,
@@ -75,7 +51,7 @@ app
       const activePage = Number(request.query.page) || 0;
       const response = await search(request.query.query, activePage);
       if (response) {
-        params.searchResult = JSON.parse(response).results[0];
+        params.searchResult = response.results[0];
         const pages = params.searchResult.nbPages;
         if (pages > 0) {
           params.pages = getRange(pages).map((page) => ({
@@ -89,24 +65,10 @@ app
     reply.view('/src/templates/search.hbs', params);
   })
   .get('/test', async (request, reply) => {
-    return render(Example(), { request, reply });
+    return render(Example, { request, reply });
   })
   .get('/products/:category', async (request, reply) => {
-    return render(Category(), { request, reply });
-  })
-  .get('/post-search', (_request, reply) => {
-    reply.view('/src/templates/post-search.hbs');
-  })
-  .post('/post-search', async (request, reply) => {
-    const { query } = request.body;
-    const params: Record<string, any> = { query };
-    if (query) {
-      const response = await search(query);
-      if (response) {
-        params.searchResult = JSON.parse(response).results[0];
-      }
-    }
-    reply.view('/src/templates/post-search.hbs', params);
+    return render(Category, { request, reply });
   })
   .get('/time', (request, reply) => {
     const getParams = () => ({ time: new Date() });
@@ -122,7 +84,7 @@ app
           }),
         1000,
       );
-      sse.pipe(reply.res);
+      (sse as any).pipe(reply.res);
     } else {
       reply.view('/src/templates/time.hbs', getParams());
     }

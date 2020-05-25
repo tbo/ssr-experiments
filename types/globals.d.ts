@@ -2,6 +2,7 @@ declare module 'undici';
 declare module 'diff-dom';
 declare module 'nanomorph';
 declare module 'ssestream2';
+declare module 'fastify-error-page';
 
 declare const createElement: (type: any, props?: any, ...children: any[]) => any;
 
@@ -12,6 +13,10 @@ interface Element<P = Record<string, any> | undefined, C = any> {
 }
 
 type ReturnElement<P> = Promise<Element<P>> | Element<P>;
+
+interface Context {
+  request: any;
+}
 
 declare namespace JSX {
   type Element = ReturnElement<any>;
