@@ -33,7 +33,7 @@ const toString = (attribute: [string, any]) => {
 
 type Node = JSX.Element | Promise<Element | string> | Element | string;
 
-type OutputEntry = string | number | Promise<Node>;
+type OutputEntry = string | Promise<Node>;
 
 export const render = async (
   RootComponent: (context: any) => Promise<JSX.Element> | JSX.Element,
@@ -46,7 +46,7 @@ export const render = async (
     } else if (typeof node === 'number') {
       return [String(node)];
     } else if (node instanceof Promise) {
-      (node as Promise<Element>).then(parseNode).then((elements) => spliceNode(elements, outputQueue.indexOf(node)));
+      (node as Promise<Node>).then(parseNode).then((elements) => spliceNode(elements, outputQueue.indexOf(node)));
       return [node];
     } else if (Array.isArray(node)) {
       return node.flatMap(parseNode);
