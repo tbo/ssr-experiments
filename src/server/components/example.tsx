@@ -1,5 +1,10 @@
+const AnotherComponent = async () => {
+  await new Promise((resolve) => setTimeout(resolve, 3000));
+  return <span>Async string</span>;
+};
+
 const SomeComponent = async (props: { stuff: string; children: any }) => {
-  await new Promise((resolve) => setTimeout(resolve, 1000));
+  await new Promise((resolve) => setTimeout(resolve, 3000));
   return (
     <p className="SomeComponent">
       <span>{props.stuff}</span>
@@ -14,6 +19,7 @@ const Example = () => (
     <p>some text</p>
     <SomeComponent stuff="123">
       <b>A bold message</b>
+      <AnotherComponent>test</AnotherComponent>
     </SomeComponent>
   </div>
 );

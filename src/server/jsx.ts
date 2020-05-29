@@ -1,10 +1,12 @@
+import { Readable, PassThrough } from 'stream';
+
 (global as any).createElement = (
   type: any,
   props: Record<string, any> | undefined,
   ...children: any[]
 ): Promise<Element> | Element => ({
   type,
-  props,
+  props: props || {},
   children,
 });
 
@@ -31,32 +33,57 @@ const toString = (attribute: [string, any]) => {
 
 type Node = JSX.Element | Promise<Element | string> | Element | string;
 
-export const render = async (RootComponent: (context: any) => Node, context?: any): Promise<string | number> => {
-  const transform = (node: any): string | number | Promise<string | number> => {
-    if (typeof node === 'string' || typeof node === 'number') {
-      return node;
+type OutputEntry = string | number | Promise<Node>;
+
+export const render = async (
+  RootComponent: (context: any) => Promise<JSX.Element> | JSX.Element,
+  context?: any,
+): Promise<Readable> => {
+  const outputQueue: OutputEntry[] = ['<!DOCTYPE html>'];
+  const parseNode = (node: Node): OutputEntry[] => {
+    if (typeof node === 'string') {
+      return [node];
+    } else if (typeof node === 'number') {
+      return [String(node)];
     } else if (node instanceof Promise) {
-      return node.then(transform);
+      (node as Promise<Element>).then(parseNode).then((elements) => spliceNode(elements, outputQueue.indexOf(node)));
+      return [node];
     } else if (Array.isArray(node)) {
-      return Promise.all(node.filter((child) => child != null).map(transform)).then((children) => children.join(''));
+      return node.flatMap(parseNode);
     }
-    const { type, props, children } = node as Element;
+    const { type, props, children } = node;
     if (typeof node.type === 'function') {
       if (!children) {
-        return transform(node.type(node.props, context));
+        return parseNode(node.type(node.props, context));
       }
-      return (transform(children) as Promise<string>).then((children) =>
-        transform(node.type(node.props ? { ...node.props, children } : { children }, context)),
-      );
+      return parseNode(node.type({ ...node.props, children: (children as any).flatMap(parseNode) }, context));
     }
-
     const propString = props ? Object.entries(props).map(toString).join('') : '';
     if (!children) {
-      return `<${type}${propString}/>`;
+      return [`<${type}${propString}/>`];
     }
-    return (transform(children) as Promise<string>).then((content) => `<${type}${propString}>${content}</${type}>`);
+    return [`<${type}${propString}>`, ...(children as any).flatMap(parseNode), `</${type}>`];
   };
+  const processQueue = () => {
+    while (typeof outputQueue[0] === 'string') {
+      sink.write(outputQueue[0]);
+      outputQueue.shift();
+    }
+    if (outputQueue[0] instanceof Promise) {
+      outputQueue[0].then(processQueue);
+    } else {
+      sink.end();
+    }
+  };
+  const spliceNode = (elements: OutputEntry[], position: number) => {
+    if (position !== -1) {
+      outputQueue.splice(position, 1, ...elements);
+    }
+  };
+  const sink = new PassThrough({});
 
   context.reply.header('content-type', 'text/html');
-  return '<!DOCTYPE html>' + (await transform(await RootComponent(context)));
+  outputQueue.push(...parseNode(await RootComponent(context)));
+  processQueue();
+  return sink;
 };
