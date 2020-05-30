@@ -21,12 +21,15 @@ const toKebapCase = (value: string) => value.match(CAMEL_CASE_PATTERN)!.join('-'
 
 const toString = (attribute: [string, any]) => {
   let [key, value] = attribute;
-  if (key === 'className') {
+  if (value == null) {
+    return '';
+  } else if (key === 'className') {
     key = 'class';
   } else if (key === 'style') {
     value = Object.entries(value)
       .map((entry) => [toKebapCase(entry[0]), entry[1]].join(':'))
-      .join(';');
+      .join(';')
+      .toLowerCase();
   }
   return ` ${key.toLowerCase()}="${value}"`;
 };
@@ -35,10 +38,7 @@ type Node = JSX.Element | Promise<Element | string> | Element | string;
 
 type OutputEntry = string | Promise<Node>;
 
-export const render = async (
-  RootComponent: (context: any) => Promise<JSX.Element> | JSX.Element,
-  context?: any,
-): Promise<Readable> => {
+export const render = (RootComponent: (context: any) => Node, context?: any): Readable => {
   const outputQueue: OutputEntry[] = ['<!DOCTYPE html>'];
   const parseNode = (node: Node): OutputEntry[] => {
     if (typeof node === 'string') {
@@ -82,8 +82,7 @@ export const render = async (
   };
   const sink = new PassThrough({});
 
-  context.reply.header('content-type', 'text/html');
-  outputQueue.push(...parseNode(await RootComponent(context)));
+  outputQueue.push(...parseNode(RootComponent(context)));
   processQueue();
   return sink;
 };

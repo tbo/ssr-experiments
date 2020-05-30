@@ -65,9 +65,11 @@ app
     reply.view('/src/templates/search.hbs', params);
   })
   .get('/test', async (request, reply) => {
+    reply.header('content-type', 'text/html');
     return render(Example, { request, reply });
   })
   .get('/products/:category', async (request, reply) => {
+    reply.header('content-type', 'text/html');
     return render(Category, { request, reply });
   })
   .get('/time', (request, reply) => {
