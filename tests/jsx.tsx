@@ -8,7 +8,12 @@ const toString = async (stream: Readable) => {
 };
 
 const expectJSXtoMatchSnapshot = async (
-  getComponent: () => JSX.Element | string | number | Array<JSX.Element | string | number>,
+  getComponent: () =>
+    | JSX.Element
+    | string
+    | number
+    | Array<JSX.Element | string | number>
+    | Promise<JSX.Element | string | number | Array<JSX.Element | string | number>>,
 ) => expect(await toString(render(getComponent, {}))).toMatchSnapshot();
 
 describe('JSX middleware', () => {
@@ -49,23 +54,35 @@ describe('JSX middleware', () => {
     ));
   });
 
-  test('Render inline JavaScript', () =>
-    expectJSXtoMatchSnapshot(() => (
+  test('Render inline JavaScript', async () => {
+    await expectJSXtoMatchSnapshot(() => (
       <ul>
         {['a', 'b', 'c'].map((content) => (
           <li key={content}>{content}</li>
         ))}
       </ul>
-    )));
+    ));
+    await expectJSXtoMatchSnapshot(() => (
+      <ul>
+        {['a', 'b', 'c'].map(async (content) => (
+          <li key={content}>{content}</li>
+        ))}
+      </ul>
+    ));
+  });
 
   test('Handle empty children', async () => {
     await expectJSXtoMatchSnapshot(() => <div>{null}</div>);
     await expectJSXtoMatchSnapshot(() => <div>{undefined}</div>);
     await expectJSXtoMatchSnapshot(() => <div />);
+    // TODO Decide if these should be self-closing
+    await expectJSXtoMatchSnapshot(() => <div>{Promise.resolve(null)}</div>);
+    await expectJSXtoMatchSnapshot(() => <div>{Promise.resolve(undefined)}</div>);
   });
 
   test('Handle 0 as valid child', async () => {
     await expectJSXtoMatchSnapshot(() => <div>{0}</div>);
+    await expectJSXtoMatchSnapshot(() => <div>{Promise.resolve(0)}</div>);
   });
 
   test('Handle atomic values', async () => {
@@ -73,11 +90,17 @@ describe('JSX middleware', () => {
     await expectJSXtoMatchSnapshot(() => 42);
     await expectJSXtoMatchSnapshot(() => undefined);
     await expectJSXtoMatchSnapshot(() => null);
+    await expectJSXtoMatchSnapshot(() => Promise.resolve('only text'));
+    await expectJSXtoMatchSnapshot(() => Promise.resolve(42));
+    await expectJSXtoMatchSnapshot(() => Promise.resolve(undefined));
+    await expectJSXtoMatchSnapshot(() => Promise.resolve(null));
   });
 
   test('Handle lists', async () => {
     await expectJSXtoMatchSnapshot(() => []);
     await expectJSXtoMatchSnapshot(() => [42, 'text', <p key="jsx">jsx</p>]);
+    await expectJSXtoMatchSnapshot(() => Promise.resolve([]));
+    await expectJSXtoMatchSnapshot(() => Promise.resolve([42, 'text', <p key="jsx">jsx</p>]));
   });
 
   test('Render custom components without properties', async () => {

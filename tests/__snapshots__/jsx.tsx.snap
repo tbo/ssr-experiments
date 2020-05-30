@@ -4,6 +4,8 @@ exports[`JSX middleware Do not render empty attribute values 1`] = `"<!DOCTYPE h
 
 exports[`JSX middleware Handle 0 as valid child 1`] = `"<!DOCTYPE html><div>0</div>"`;
 
+exports[`JSX middleware Handle 0 as valid child 2`] = `"<!DOCTYPE html><div>0</div>"`;
+
 exports[`JSX middleware Handle atomic values 1`] = `"<!DOCTYPE html>only text"`;
 
 exports[`JSX middleware Handle atomic values 2`] = `"<!DOCTYPE html>42"`;
@@ -12,15 +14,31 @@ exports[`JSX middleware Handle atomic values 3`] = `"<!DOCTYPE html>"`;
 
 exports[`JSX middleware Handle atomic values 4`] = `"<!DOCTYPE html>"`;
 
+exports[`JSX middleware Handle atomic values 5`] = `"<!DOCTYPE html>only text"`;
+
+exports[`JSX middleware Handle atomic values 6`] = `"<!DOCTYPE html>42"`;
+
+exports[`JSX middleware Handle atomic values 7`] = `"<!DOCTYPE html>"`;
+
+exports[`JSX middleware Handle atomic values 8`] = `"<!DOCTYPE html>"`;
+
 exports[`JSX middleware Handle empty children 1`] = `"<!DOCTYPE html><div/>"`;
 
 exports[`JSX middleware Handle empty children 2`] = `"<!DOCTYPE html><div/>"`;
 
 exports[`JSX middleware Handle empty children 3`] = `"<!DOCTYPE html><div/>"`;
 
+exports[`JSX middleware Handle empty children 4`] = `"<!DOCTYPE html><div></div>"`;
+
+exports[`JSX middleware Handle empty children 5`] = `"<!DOCTYPE html><div></div>"`;
+
 exports[`JSX middleware Handle lists 1`] = `"<!DOCTYPE html>"`;
 
 exports[`JSX middleware Handle lists 2`] = `"<!DOCTYPE html>42text<p key=\\"jsx\\">jsx</p>"`;
+
+exports[`JSX middleware Handle lists 3`] = `"<!DOCTYPE html>"`;
+
+exports[`JSX middleware Handle lists 4`] = `"<!DOCTYPE html>42text<p key=\\"jsx\\">jsx</p>"`;
 
 exports[`JSX middleware Render attributes 1`] = `"<!DOCTYPE html><div id=\\"test\\" style=\\"padding:3;text-align:right\\" data-testid=\\"testid\\">simple component</div>"`;
 
@@ -41,6 +59,8 @@ exports[`JSX middleware Render custom components without properties 1`] = `"<!DO
 exports[`JSX middleware Render custom components without properties 2`] = `"<!DOCTYPE html><span>custom component</span>"`;
 
 exports[`JSX middleware Render inline JavaScript 1`] = `"<!DOCTYPE html><ul><li key=\\"a\\">a</li><li key=\\"b\\">b</li><li key=\\"c\\">c</li></ul>"`;
+
+exports[`JSX middleware Render inline JavaScript 2`] = `"<!DOCTYPE html><ul><li key=\\"a\\">a</li><li key=\\"b\\">b</li><li key=\\"c\\">c</li></ul>"`;
 
 exports[`JSX middleware Render multiple nested elements 1`] = `"<!DOCTYPE html><div><span>first</span>second<span><p>third</p></span>fourth</div>"`;
 

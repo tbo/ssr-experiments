@@ -38,9 +38,12 @@ type Node = JSX.Element | Promise<Element | string | number> | Element | string 
 
 type OutputEntry = string | Promise<Node>;
 
-export const render = (RootComponent: (context: any) => Node | Node[], context?: any): Readable => {
+export const render = (
+  RootComponent: (context: any) => Promise<Node | Node[]> | Node | Node[],
+  context?: any,
+): Readable => {
   const outputQueue: OutputEntry[] = ['<!DOCTYPE html>'];
-  const parseNode = (node: Node | Node[]): OutputEntry[] => {
+  const parseNode = (node: Promise<Node | Node[]> | Node | Node[]): OutputEntry[] => {
     if (node == null) {
       return [];
     } else if (typeof node === 'string') {
@@ -48,8 +51,8 @@ export const render = (RootComponent: (context: any) => Node | Node[], context?:
     } else if (typeof node === 'number') {
       return [String(node)];
     } else if (node instanceof Promise) {
-      (node as Promise<Node>).then(parseNode).then((elements) => spliceNode(elements, outputQueue.indexOf(node)));
-      return [node];
+      (node as Promise<any>).then(parseNode).then((elements) => spliceNode(elements, outputQueue.indexOf(node as any)));
+      return [node as any];
     } else if (Array.isArray(node)) {
       return node.flatMap(parseNode);
     }
