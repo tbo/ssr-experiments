@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "dev": "TSC_WATCHFILE=UseFsEvents ts-node-dev --no-notify src/server",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "jest"
   },
   "repository": {
     "type": "git",
@@ -26,9 +26,11 @@
     "fastify-multipart": "^1.0.6",
     "fastify-static": "^2.7.0",
     "handlebars": "^4.7.6",
+    "jest": "^26.0.1",
     "nanohtml": "^1.9.1",
     "nanomorph": "^5.4.0",
     "point-of-view": "^3.8.0",
+    "remove": "^0.1.5",
     "replacestream": "^4.0.3",
     "snabbdom": "^0.7.4",
     "ssestream2": "^1.0.0",
@@ -37,6 +39,7 @@
   "devDependencies": {
     "@babel/runtime": "^7.9.6",
     "@types/classnames": "^2.2.10",
+    "@types/jest": "^25.2.3",
     "@types/morphdom": "^2.4.2",
     "@types/node": "^14.0.5",
     "@types/replacestream": "^4.0.0",
@@ -45,6 +48,7 @@
     "eslint": "^7.1.0",
     "eslint-plugin-react": "^7.20.0",
     "morphdom": "^2.6.1",
+    "ts-jest": "^26.0.0",
     "ts-loader": "^7.0.4",
     "ts-node-dev": "^1.0.0-pre.44",
     "typescript": "^3.9.3",

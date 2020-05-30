@@ -26,5 +26,11 @@ module.exports = {
         '@typescript-eslint/no-use-before-define': 'off',
       },
     },
+    {
+      files: ['*.js'],
+      rules: {
+        '@typescript-eslint/no-var-requires': 'off',
+      },
+    },
   ],
 };
