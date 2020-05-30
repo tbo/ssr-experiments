@@ -111,6 +111,13 @@ describe('JSX middleware', () => {
       </div>
     ));
     await expectJSXtoMatchSnapshot(() => <Component />);
+    const AsyncComponent = async () => <span>async custom component</span>;
+    await expectJSXtoMatchSnapshot(() => (
+      <div>
+        <AsyncComponent />
+      </div>
+    ));
+    await expectJSXtoMatchSnapshot(() => <AsyncComponent />);
   });
 
   test('Render custom components with properties', async () => {
@@ -121,6 +128,15 @@ describe('JSX middleware', () => {
       </div>
     ));
     await expectJSXtoMatchSnapshot(() => <Component title="Another title" count={0} />);
+    const AsyncComponent = async (props: { title: string; count: number }) => (
+      <span title={props.title}>{props.count}</span>
+    );
+    await expectJSXtoMatchSnapshot(() => (
+      <div>
+        <AsyncComponent title="A nice title" count={42} />
+      </div>
+    ));
+    await expectJSXtoMatchSnapshot(() => <AsyncComponent title="Another title" count={0} />);
   });
 
   test('Render custom components with children', async () => {

@@ -54,9 +54,17 @@ exports[`JSX middleware Render custom components with properties 1`] = `"<!DOCTY
 
 exports[`JSX middleware Render custom components with properties 2`] = `"<!DOCTYPE html><span title=\\"Another title\\">0</span>"`;
 
+exports[`JSX middleware Render custom components with properties 3`] = `"<!DOCTYPE html><div><span title=\\"A nice title\\">42</span></div>"`;
+
+exports[`JSX middleware Render custom components with properties 4`] = `"<!DOCTYPE html><span title=\\"Another title\\">0</span>"`;
+
 exports[`JSX middleware Render custom components without properties 1`] = `"<!DOCTYPE html><div><span>custom component</span></div>"`;
 
 exports[`JSX middleware Render custom components without properties 2`] = `"<!DOCTYPE html><span>custom component</span>"`;
+
+exports[`JSX middleware Render custom components without properties 3`] = `"<!DOCTYPE html><div><span>async custom component</span></div>"`;
+
+exports[`JSX middleware Render custom components without properties 4`] = `"<!DOCTYPE html><span>async custom component</span>"`;
 
 exports[`JSX middleware Render inline JavaScript 1`] = `"<!DOCTYPE html><ul><li key=\\"a\\">a</li><li key=\\"b\\">b</li><li key=\\"c\\">c</li></ul>"`;
 
