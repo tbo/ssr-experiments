@@ -2,6 +2,48 @@
 
 exports[`JSX middleware Do not render empty attribute values 1`] = `"<!DOCTYPE html><div>simple component</div>"`;
 
-exports[`JSX middleware Render attributes 1`] = `"<!DOCTYPE html><div id=\\"test\\" style=\\"padding:3;text-align:right\\">simple component</div>"`;
+exports[`JSX middleware Handle 0 as valid child 1`] = `"<!DOCTYPE html><div>0</div>"`;
+
+exports[`JSX middleware Handle atomic values 1`] = `"<!DOCTYPE html>only text"`;
+
+exports[`JSX middleware Handle atomic values 2`] = `"<!DOCTYPE html>42"`;
+
+exports[`JSX middleware Handle atomic values 3`] = `"<!DOCTYPE html>"`;
+
+exports[`JSX middleware Handle atomic values 4`] = `"<!DOCTYPE html>"`;
+
+exports[`JSX middleware Handle empty children 1`] = `"<!DOCTYPE html><div/>"`;
+
+exports[`JSX middleware Handle empty children 2`] = `"<!DOCTYPE html><div/>"`;
+
+exports[`JSX middleware Handle empty children 3`] = `"<!DOCTYPE html><div/>"`;
+
+exports[`JSX middleware Handle lists 1`] = `"<!DOCTYPE html>"`;
+
+exports[`JSX middleware Handle lists 2`] = `"<!DOCTYPE html>42text<p key=\\"jsx\\">jsx</p>"`;
+
+exports[`JSX middleware Render attributes 1`] = `"<!DOCTYPE html><div id=\\"test\\" style=\\"padding:3;text-align:right\\" data-testid=\\"testid\\">simple component</div>"`;
+
+exports[`JSX middleware Render custom components with children 1`] = `"<!DOCTYPE html><div><span>Children</span></div>"`;
+
+exports[`JSX middleware Render custom components with children 2`] = `"<!DOCTYPE html><span><b>A bold message</b></span>"`;
+
+exports[`JSX middleware Render custom components with children 3`] = `"<!DOCTYPE html><span/>"`;
+
+exports[`JSX middleware Render custom components with children 4`] = `"<!DOCTYPE html><span>42</span>"`;
+
+exports[`JSX middleware Render custom components with properties 1`] = `"<!DOCTYPE html><div><span title=\\"A nice title\\">42</span></div>"`;
+
+exports[`JSX middleware Render custom components with properties 2`] = `"<!DOCTYPE html><span title=\\"Another title\\">0</span>"`;
+
+exports[`JSX middleware Render custom components without properties 1`] = `"<!DOCTYPE html><div><span>custom component</span></div>"`;
+
+exports[`JSX middleware Render custom components without properties 2`] = `"<!DOCTYPE html><span>custom component</span>"`;
+
+exports[`JSX middleware Render inline JavaScript 1`] = `"<!DOCTYPE html><ul><li key=\\"a\\">a</li><li key=\\"b\\">b</li><li key=\\"c\\">c</li></ul>"`;
+
+exports[`JSX middleware Render multiple nested elements 1`] = `"<!DOCTYPE html><div><span>first</span>second<span><p>third</p></span>fourth</div>"`;
+
+exports[`JSX middleware Render nested elements 1`] = `"<!DOCTYPE html><div><span>nested component</span></div>"`;
 
 exports[`JSX middleware Render simple jsx tag 1`] = `"<!DOCTYPE html><div>simple component</div>"`;

@@ -26,7 +26,7 @@ declare namespace JSX {
   }
 
   interface IntrinsicAttributes {
-    children: any;
+    children?: any;
   }
 
   interface IntrinsicElements {

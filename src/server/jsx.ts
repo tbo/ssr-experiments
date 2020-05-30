@@ -34,14 +34,16 @@ const toString = (attribute: [string, any]) => {
   return ` ${key.toLowerCase()}="${value}"`;
 };
 
-type Node = JSX.Element | Promise<Element | string> | Element | string;
+type Node = JSX.Element | Promise<Element | string | number> | Element | string | number;
 
 type OutputEntry = string | Promise<Node>;
 
-export const render = (RootComponent: (context: any) => Node, context?: any): Readable => {
+export const render = (RootComponent: (context: any) => Node | Node[], context?: any): Readable => {
   const outputQueue: OutputEntry[] = ['<!DOCTYPE html>'];
-  const parseNode = (node: Node): OutputEntry[] => {
-    if (typeof node === 'string') {
+  const parseNode = (node: Node | Node[]): OutputEntry[] => {
+    if (node == null) {
+      return [];
+    } else if (typeof node === 'string') {
       return [node];
     } else if (typeof node === 'number') {
       return [String(node)];
@@ -51,15 +53,16 @@ export const render = (RootComponent: (context: any) => Node, context?: any): Re
     } else if (Array.isArray(node)) {
       return node.flatMap(parseNode);
     }
-    const { type, props, children } = node;
+    const { type, props } = node;
+    const children = (node.children as any).filter((child: any) => child != null);
     if (typeof node.type === 'function') {
-      if (!children) {
+      if (!children || !children.length) {
         return parseNode(node.type(node.props, context));
       }
       return parseNode(node.type({ ...node.props, children: (children as any).flatMap(parseNode) }, context));
     }
     const propString = props ? Object.entries(props).map(toString).join('') : '';
-    if (!children) {
+    if (!children || !children.length) {
       return [`<${type}${propString}/>`];
     }
     return [`<${type}${propString}>`, ...(children as any).flatMap(parseNode), `</${type}>`];
