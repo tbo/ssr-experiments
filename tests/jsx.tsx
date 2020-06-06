@@ -16,6 +16,8 @@ const expectJSXtoMatchSnapshot = async (
     | Promise<JSX.Element | string | number | Array<JSX.Element | string | number>>,
 ) => expect(await toString(render(getComponent, {}))).toMatchSnapshot();
 
+const nextTick = () => new Promise((resolve) => setImmediate(resolve));
+
 describe('JSX middleware', () => {
   test('Render simple jsx tag', async () => {
     await expectJSXtoMatchSnapshot(() => <div>simple component</div>);
@@ -153,5 +155,67 @@ describe('JSX middleware', () => {
     ));
     await expectJSXtoMatchSnapshot(() => <Component>{null}</Component>);
     await expectJSXtoMatchSnapshot(() => <Component>{42}</Component>);
+  });
+
+  test('Trigger and stream components eagerly', async () => {
+    const triggered = [];
+    const getAsyncComponent = (id: string, custom?: () => JSX.Element): [() => JSX.Element, () => Promise<void>] => {
+      let resolvePromise: () => void;
+      const signal = new Promise((resolve) => (resolvePromise = resolve));
+      return [
+        async () => {
+          triggered.push(id);
+          await signal;
+          return custom?.() || <div>Leaf {id}</div>;
+        },
+        async () => {
+          resolvePromise();
+          await nextTick();
+        },
+      ];
+    };
+    const [LeafComponentA, triggerA] = getAsyncComponent('A');
+    const [LeafComponentB, triggerB] = getAsyncComponent('B');
+    const [LeafComponentD, triggerD] = getAsyncComponent('D');
+    const [LeafComponentC, triggerC] = getAsyncComponent('C', () => (
+      <div>
+        <LeafComponentD />
+      </div>
+    ));
+
+    const [LeafComponentE, triggerE] = getAsyncComponent('E');
+    const [LeafComponentF, triggerF] = getAsyncComponent('F');
+
+    const WrapperComponent = async (props: { children: any }) => <div>{props.children}</div>;
+
+    const RootComponent = async () => (
+      <div>
+        <LeafComponentA />
+        <WrapperComponent>
+          <LeafComponentB />
+          <LeafComponentC />
+          <LeafComponentE />
+        </WrapperComponent>
+        <LeafComponentF />
+      </div>
+    );
+
+    const stream = render(RootComponent, {});
+    let output = '';
+    stream.on('data', (data) => (output += data));
+    await triggerA();
+    expect(output).toMatchSnapshot();
+    await triggerB();
+    expect(output).toMatchSnapshot();
+    await triggerC();
+    expect(output).toMatchSnapshot();
+    await triggerD();
+    expect(output).toMatchSnapshot();
+    await triggerE();
+    expect(output).toMatchSnapshot();
+    await triggerF();
+    expect(output).toMatchSnapshot();
+    // Every component should only be triggered once
+    expect(triggered.sort()).toMatchObject(['A', 'B', 'C', 'D', 'E', 'F']);
   });
 });

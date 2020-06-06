@@ -48,6 +48,7 @@
     "eslint": "^7.1.0",
     "eslint-plugin-react": "^7.20.0",
     "morphdom": "^2.6.1",
+    "prettier": "^2.0.5",
     "ts-jest": "^26.0.0",
     "ts-loader": "^7.0.4",
     "ts-node-dev": "^1.0.0-pre.44",

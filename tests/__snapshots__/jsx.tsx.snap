@@ -75,3 +75,15 @@ exports[`JSX middleware Render multiple nested elements 1`] = `"<!DOCTYPE html><
 exports[`JSX middleware Render nested elements 1`] = `"<!DOCTYPE html><div><span>nested component</span></div>"`;
 
 exports[`JSX middleware Render simple jsx tag 1`] = `"<!DOCTYPE html><div>simple component</div>"`;
+
+exports[`JSX middleware Trigger and stream components eagerly 1`] = `"<!DOCTYPE html><div><div>Leaf A</div><div>"`;
+
+exports[`JSX middleware Trigger and stream components eagerly 2`] = `"<!DOCTYPE html><div><div>Leaf A</div><div><div>Leaf B</div>"`;
+
+exports[`JSX middleware Trigger and stream components eagerly 3`] = `"<!DOCTYPE html><div><div>Leaf A</div><div><div>Leaf B</div><div>"`;
+
+exports[`JSX middleware Trigger and stream components eagerly 4`] = `"<!DOCTYPE html><div><div>Leaf A</div><div><div>Leaf B</div><div><div>Leaf D</div></div>"`;
+
+exports[`JSX middleware Trigger and stream components eagerly 5`] = `"<!DOCTYPE html><div><div>Leaf A</div><div><div>Leaf B</div><div><div>Leaf D</div></div><div>Leaf E</div></div>"`;
+
+exports[`JSX middleware Trigger and stream components eagerly 6`] = `"<!DOCTYPE html><div><div>Leaf A</div><div><div>Leaf B</div><div><div>Leaf D</div></div><div>Leaf E</div></div><div>Leaf F</div></div>"`;
