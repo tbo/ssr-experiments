@@ -51,10 +51,7 @@ export const render = (
     } else if (typeof node === 'number') {
       return [String(node)];
     } else if (node instanceof Promise) {
-      // if (!(node as any).__handled) {
       (node as any) = (node as Promise<any>).then(parseNode);
-      // (node as any).__handled = true;
-      // }
       (node as Promise<any>).then((elements) => spliceNode(elements, outputQueue.indexOf(node as any)));
       return [node as any];
     } else if (Array.isArray(node)) {

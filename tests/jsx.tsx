@@ -226,12 +226,12 @@ describe('JSX middleware', () => {
   test('Parallelize execution order', async () => {
     let output = '';
     const AnotherComponent = async () => {
-      await new Promise((resolve) => setTimeout(resolve, 100));
+      await new Promise((resolve) => setTimeout(resolve, 50));
       return <span>Async string</span>;
     };
 
     const SomeComponent = async (props: { stuff: string; children: any }) => {
-      await new Promise((resolve) => setTimeout(resolve, 100));
+      await new Promise((resolve) => setTimeout(resolve, 50));
       return (
         <p className="SomeComponent">
           <span>{props.stuff}</span>
@@ -255,7 +255,7 @@ describe('JSX middleware', () => {
     stream.on('data', (data) => (output += data));
     await new Promise((resolve) => setTimeout(resolve, 20));
     expect(output).toMatchSnapshot();
-    await new Promise((resolve) => setTimeout(resolve, 120));
+    await new Promise((resolve) => setTimeout(resolve, 60));
     expect(output).toMatchSnapshot();
   });
 });
