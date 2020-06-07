@@ -51,7 +51,11 @@ export const render = (
     } else if (typeof node === 'number') {
       return [String(node)];
     } else if (node instanceof Promise) {
-      (node as Promise<any>).then(parseNode).then((elements) => spliceNode(elements, outputQueue.indexOf(node as any)));
+      if (!(node as any).__handled) {
+        (node as any) = (node as Promise<any>).then(parseNode);
+        (node as any).__handled = true;
+      }
+      (node as Promise<any>).then((elements) => spliceNode(elements, outputQueue.indexOf(node as any)));
       return [node as any];
     } else if (Array.isArray(node)) {
       return node.flatMap(parseNode);
@@ -62,7 +66,7 @@ export const render = (
       if (!children || !children.length) {
         return parseNode(node.type(node.props, context));
       }
-      return parseNode(node.type({ ...node.props, children: (children as any).flatMap(parseNode) }, context));
+      return parseNode(node.type({ ...node.props, children: parseNode(children) }, context));
     }
     const propString = props ? Object.entries(props).map(toString).join('') : '';
     if (!children || !children.length) {

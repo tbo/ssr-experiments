@@ -159,14 +159,14 @@ describe('JSX middleware', () => {
 
   test('Trigger and stream components eagerly', async () => {
     const triggered = [];
-    const getAsyncComponent = (id: string, custom?: () => JSX.Element): [() => JSX.Element, () => Promise<void>] => {
+    const getAsyncComponent = (id: string, Custom?: () => JSX.Element): [() => JSX.Element, () => Promise<void>] => {
       let resolvePromise: () => void;
       const signal = new Promise((resolve) => (resolvePromise = resolve));
       return [
         async () => {
           triggered.push(id);
           await signal;
-          return custom?.() || <div>Leaf {id}</div>;
+          return Custom ? <Custom /> : <div>Leaf {id}</div>;
         },
         async () => {
           resolvePromise();

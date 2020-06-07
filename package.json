@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "TSC_WATCHFILE=UseFsEvents ts-node-dev --no-notify src/server",
+    "dev": "TSC_WATCHFILE=UseFsEvents ts-node-dev --no-notify --inspect -- src/server",
     "test": "jest"
   },
   "repository": {

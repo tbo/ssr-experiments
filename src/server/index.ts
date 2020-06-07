@@ -14,6 +14,7 @@ import { render } from './jsx';
 import Category from './pages/category';
 import { search } from './utilities/algolia';
 import fastifyErrorPage from 'fastify-error-page';
+import Nested from './components/nested';
 
 const timeTemplate = handlebars.compile(readFileSync('./src/templates/time.hbs', 'utf-8'));
 
@@ -67,6 +68,10 @@ app
   .get('/test', async (request, reply) => {
     reply.header('content-type', 'text/html');
     return render(Example, { request, reply });
+  })
+  .get('/nested', async (request, reply) => {
+    reply.header('content-type', 'text/html');
+    return render(Nested, { request, reply });
   })
   .get('/products/:category', async (request, reply) => {
     reply.header('content-type', 'text/html');
