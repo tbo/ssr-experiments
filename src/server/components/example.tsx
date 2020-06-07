@@ -1,10 +1,10 @@
 const AnotherComponent = async () => {
-  await new Promise((resolve) => setTimeout(resolve, 3000));
+  await new Promise((resolve) => setTimeout(resolve, 1500));
   return <span>Async string</span>;
 };
 
 const SomeComponent = async (props: { stuff: string; children: any }) => {
-  await new Promise((resolve) => setTimeout(resolve, 3000));
+  await new Promise((resolve) => setTimeout(resolve, 1500));
   return (
     <p className="SomeComponent">
       <span>{props.stuff}</span>

@@ -40,6 +40,10 @@ exports[`JSX middleware Handle lists 3`] = `"<!DOCTYPE html>"`;
 
 exports[`JSX middleware Handle lists 4`] = `"<!DOCTYPE html>42text<p key=\\"jsx\\">jsx</p>"`;
 
+exports[`JSX middleware Parallelize execution order 1`] = `"<!DOCTYPE html><div id=\\"abc\\" style=\\"color:red;padding:3\\"><h1>JSX Example</h1><p>some text</p>"`;
+
+exports[`JSX middleware Parallelize execution order 2`] = `"<!DOCTYPE html><div id=\\"abc\\" style=\\"color:red;padding:3\\"><h1>JSX Example</h1><p>some text</p><p class=\\"SomeComponent\\"><span>123</span><div><b>A bold message</b><span>Async string</span></div></p></div>"`;
+
 exports[`JSX middleware Render attributes 1`] = `"<!DOCTYPE html><div id=\\"test\\" style=\\"padding:3;text-align:right\\" data-testid=\\"testid\\">simple component</div>"`;
 
 exports[`JSX middleware Render custom components with children 1`] = `"<!DOCTYPE html><div><span>Children</span></div>"`;

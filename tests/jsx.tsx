@@ -200,9 +200,12 @@ describe('JSX middleware', () => {
       </div>
     );
 
-    const stream = render(RootComponent, {});
     let output = '';
-    stream.on('data', (data) => (output += data));
+    const execute = () => render(RootComponent, {}).on('data', (data) => (output += data));
+
+    // Trigger all components from top to bottom
+
+    execute();
     await triggerA();
     expect(output).toMatchSnapshot();
     await triggerB();
@@ -215,7 +218,44 @@ describe('JSX middleware', () => {
     expect(output).toMatchSnapshot();
     await triggerF();
     expect(output).toMatchSnapshot();
+
     // Every component should only be triggered once
-    expect(triggered.sort()).toMatchObject(['A', 'B', 'C', 'D', 'E', 'F']);
+    expect(triggered).toMatchObject(['A', 'B', 'C', 'E', 'F', 'D']);
+  });
+
+  test('Parallelize execution order', async () => {
+    let output = '';
+    const AnotherComponent = async () => {
+      await new Promise((resolve) => setTimeout(resolve, 100));
+      return <span>Async string</span>;
+    };
+
+    const SomeComponent = async (props: { stuff: string; children: any }) => {
+      await new Promise((resolve) => setTimeout(resolve, 100));
+      return (
+        <p className="SomeComponent">
+          <span>{props.stuff}</span>
+          <div>{props.children}</div>
+        </p>
+      );
+    };
+
+    const RootComponent = () => (
+      <div id="abc" style={{ color: 'red', padding: 3 }}>
+        <h1>JSX Example</h1>
+        <p>some text</p>
+        <SomeComponent stuff="123">
+          <b>A bold message</b>
+          <AnotherComponent>test</AnotherComponent>
+        </SomeComponent>
+      </div>
+    );
+
+    const stream = render(RootComponent, {});
+    stream.on('data', (data) => (output += data));
+    await new Promise((resolve) => setTimeout(resolve, 20));
+    expect(output).toMatchSnapshot();
+    await new Promise((resolve) => setTimeout(resolve, 120));
+    expect(output).toMatchSnapshot();
   });
 });
