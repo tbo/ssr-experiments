@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "dev": "TSC_WATCHFILE=UseFsEvents ts-node-dev --no-notify --inspect -- src/server",
-    "benchmark": "concurrently -rk 'ts-node -T -- benchmarks/jsx/index.ts' 'sleep 1 && artillery run benchmarks/artillery.yaml' || true",
+    "benchmark": "ts-node -T -- benchmarks/index.ts",
     "test": "jest"
   },
   "repository": {
@@ -46,7 +46,6 @@
     "@types/replacestream": "^4.0.0",
     "@typescript-eslint/eslint-plugin": "^3.0.0",
     "@typescript-eslint/parser": "^3.0.0",
-    "artillery": "^1.6.0",
     "concurrently": "^5.2.0",
     "eslint": "^7.1.0",
     "eslint-plugin-react": "^7.20.0",
