@@ -6,6 +6,7 @@
     "jsxFactory": "createElement",
     "sourceMap": true,
     "moduleResolution": "node",
-    "esModuleInterop": true
+    "esModuleInterop": true,
+    "resolveJsonModule": true
   }
 }
