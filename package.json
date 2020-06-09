@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "dev": "TSC_WATCHFILE=UseFsEvents ts-node-dev --no-notify --inspect -- src/server",
-    "benchmark": "ts-node -T -- benchmarks/index.ts",
+    "benchmark": "NODE_ENV=production ts-node -T -- benchmarks/index.ts",
     "test": "jest"
   },
   "repository": {
@@ -51,6 +51,8 @@
     "eslint-plugin-react": "^7.20.0",
     "morphdom": "^2.6.1",
     "prettier": "^2.0.5",
+    "react": "^16.13.1",
+    "react-dom": "^16.13.1",
     "ts-jest": "^26.0.0",
     "ts-loader": "^7.0.4",
     "ts-node-dev": "^1.0.0-pre.44",

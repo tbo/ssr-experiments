@@ -3,6 +3,7 @@ declare module 'diff-dom';
 declare module 'nanomorph';
 declare module 'ssestream2';
 declare module 'fastify-error-page';
+declare module 'react-dom';
 
 declare const createElement: (type: any, props?: any, ...children: any[]) => any;
 
