@@ -2,7 +2,8 @@ import { performance } from 'perf_hooks';
 import { Readable, Stream } from 'stream';
 import jsxBenchmark from './jsx';
 import reactBenchmark from './react';
-import templateTagBenchmark from './simple-template-tag';
+import simpleTemplateTagBenchmark from './simple-template-tag';
+import advancedTemplateTagBenchmark from './advanced-template-tag';
 
 const SAMPLES = 1000;
 
@@ -24,6 +25,9 @@ const executeBenchmark = async (label: string, benchmark: () => Promise<Readable
   const timeToFirstByte = [];
   const timeToLastByte = [];
 
+  for (let i = 1; i <= 1000; i++) {
+    await benchmark();
+  }
   for (let i = 1; i <= SAMPLES; i++) {
     const start = performance.now();
     const response = await benchmark();
@@ -41,9 +45,10 @@ const executeBenchmark = async (label: string, benchmark: () => Promise<Readable
 };
 
 const executeBenchmarks = async () => {
-  await executeBenchmark('JSX', jsxBenchmark);
-  await executeBenchmark('React', reactBenchmark);
-  await executeBenchmark('Simple Template Tag', templateTagBenchmark);
+  // await executeBenchmark('JSX', jsxBenchmark);
+  // await executeBenchmark('React', reactBenchmark);
+  await executeBenchmark('Simple Template Tag', simpleTemplateTagBenchmark);
+  await executeBenchmark('Advanced Template Tag', advancedTemplateTagBenchmark);
 };
 
 executeBenchmarks();
