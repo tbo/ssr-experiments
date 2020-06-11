@@ -39,14 +39,14 @@ function html(literalSections: any, ...substs: any[]) {
 const Base = (contents: any) => html`
   <html lang="en">
     <head>
-      <meta charSet="utf-8" />
+      <meta charset="utf-8" />
       <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
       <title>Hybrid Search</title>
     </head>
     <body>
       <nav>
         <div className="nav-wrapper">
-          <a href="/" className="brand-logo" style={{ paddingLeft: 10 }}>
+          <a href="/" className="brand-logo" style="padding-left: 10">
             Hybrid Search
           </a>
           <ul id="nav-mobile" className="right hide-on-med-and-down">
@@ -90,19 +90,19 @@ const getProductTile = ({ id, name, price, description, image }: any) => html`
   </div>
 `;
 
+const getPaginationEntry = (activePage: number, query: string) => (page: number) => html`
+  <li className="${classNames('waves-effect', { active: activePage === page })}>
+    <a href="?${getQuery({ query, page })}">${page + 1}</a>
+  </li>
+`;
+
 const getPagination = (total: number, activePage: number, query: string) => {
   if (!total) {
     return '';
   }
   return html`
     <ul className="pagination">
-      ${getRange(total).map(
-        (page) => html`
-              <li className="${classNames('waves-effect', { active: activePage === page })}>
-                <a href="?${getQuery({ query, page })}">${page + 1}</a>
-              </li>
-            `,
-      )}
+      ${getRange(total).map(getPaginationEntry(activePage, query))}
     </ul>
   `;
 };
