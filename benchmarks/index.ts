@@ -25,7 +25,7 @@ const executeBenchmark = async (label: string, benchmark: () => Promise<Readable
   const timeToFirstByte = [];
   const timeToLastByte = [];
 
-  for (let i = 1; i <= 1000; i++) {
+  for (let i = 1; i <= 100; i++) {
     await benchmark();
   }
   for (let i = 1; i <= SAMPLES; i++) {
@@ -35,6 +35,7 @@ const executeBenchmark = async (label: string, benchmark: () => Promise<Readable
       response.once('data', () => timeToFirstByte.push(performance.now() - start));
       await new Promise((resolve) => response.on('end', resolve));
     } else {
+      // console.log(response);
       timeToFirstByte.push(performance.now() - start);
     }
     timeToLastByte.push(performance.now() - start);
@@ -45,8 +46,8 @@ const executeBenchmark = async (label: string, benchmark: () => Promise<Readable
 };
 
 const executeBenchmarks = async () => {
-  // await executeBenchmark('JSX', jsxBenchmark);
-  // await executeBenchmark('React', reactBenchmark);
+  await executeBenchmark('JSX', jsxBenchmark);
+  await executeBenchmark('React', reactBenchmark);
   await executeBenchmark('Simple Template Tag', simpleTemplateTagBenchmark);
   await executeBenchmark('Advanced Template Tag', advancedTemplateTagBenchmark);
 };

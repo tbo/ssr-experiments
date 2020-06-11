@@ -7,29 +7,26 @@ const getRange = (to: number) => [...Array(to).keys()];
 const getQuery = (params: Record<string, string | number>) =>
   stringify(Object.fromEntries(Object.entries(params).filter(([, value]) => value)));
 
-const html = async (literalSections: any, ...substs: any[]) => {
-  // Use raw literal sections: we don’t want
-  // backslashes (\n etc.) to be interpreted
+const html = (literalSections: any, ...substs: any[]) => async (context: any) => {
   const raw = literalSections.raw;
-
   let result = '';
-
+  substs = substs.map((subst) => (typeof subst === 'function' ? subst(context) : subst));
   for (let i = 0; i < substs.length; i++) {
-    let subst = substs[i] instanceof Promise ? await substs[i] : substs[i];
-    // In the example, map() returns an array:
-    // If substitution is an array (and not a string),
-    // we turn it into a string
+    let subst = substs[i];
+    subst = subst instanceof Promise ? await subst : subst;
+    result += raw[i];
     if (Array.isArray(subst)) {
-      subst = subst.join('');
+      const list = subst.flat();
+      for (let j = 0; j < list.length; j++) {
+        let s = typeof list[j] === 'function' ? (list as any)[j]() : list[j];
+        s = s instanceof Promise ? await s : s;
+        result += s;
+      }
+    } else {
+      result += subst;
     }
-
-    result += raw[i] + subst;
   }
-  // Take care of last literal section
-  // (Never fails, because an empty template string
-  // produces one literal section, an empty string)
   result += raw[raw.length - 1]; // (A)
-
   return result;
 };
 
@@ -72,7 +69,7 @@ const Base = (contents: any) => html`
 `;
 
 const getProductTile = ({ id, name, price, description, image }: any) => html`
-  <div id=${id} className="card blue-grey darken-1 hit">
+  <div id="${id}" className="card blue-grey darken-1 hit">
     <div className="card-content white-text">
       <span className="card-title">${name}</span>
     </div>
