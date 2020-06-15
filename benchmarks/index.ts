@@ -4,14 +4,15 @@ import jsxBenchmark from './jsx';
 import reactBenchmark from './react';
 import simpleTemplateTagBenchmark from './simple-template-tag';
 import advancedTemplateTagBenchmark from './advanced-template-tag';
+import streamingTemplateTagBenchmark from './streaming-template-tag';
 
 const SAMPLES = 1000;
 
-// const toString = async (stream: Readable) => {
-//   let buffer = '';
-//   stream.on('data', (data: string) => (buffer += data));
-//   return new Promise((resolve) => stream.on('end', () => resolve(buffer)));
-// };
+const toString = async (stream: Readable) => {
+  let buffer = '';
+  stream.on('data', (data: string) => (buffer += data.toString()));
+  return new Promise((resolve) => stream.on('end', () => resolve(buffer)));
+};
 
 const formatNumber = (input: number) => String(input.toFixed(2)).padStart(6);
 const printStats = (label: string, timings: number[]) => {
@@ -34,8 +35,8 @@ const executeBenchmark = async (label: string, benchmark: () => Promise<Readable
     if (response instanceof Stream) {
       response.once('data', () => timeToFirstByte.push(performance.now() - start));
       await new Promise((resolve) => response.on('end', resolve));
+      // console.log(await toString(response));
     } else {
-      // console.log(response);
       timeToFirstByte.push(performance.now() - start);
     }
     timeToLastByte.push(performance.now() - start);
@@ -50,6 +51,7 @@ const executeBenchmarks = async () => {
   await executeBenchmark('React', reactBenchmark);
   await executeBenchmark('Simple Template Tag', simpleTemplateTagBenchmark);
   await executeBenchmark('Advanced Template Tag', advancedTemplateTagBenchmark);
+  await executeBenchmark('Streaming Template Tag', streamingTemplateTagBenchmark);
 };
 
 executeBenchmarks();

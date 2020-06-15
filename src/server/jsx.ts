@@ -72,10 +72,11 @@ export const render = (
     return [`<${type}${propString}>`, ...(children as any).flatMap(parseNode), `</${type}>`];
   };
   const processQueue = () => {
+    let buffer = '';
     while (typeof outputQueue[0] === 'string') {
-      sink.write(outputQueue[0]);
-      outputQueue.shift();
+      buffer += outputQueue.shift();
     }
+    sink.write(buffer);
     if (outputQueue[0] instanceof Promise) {
       outputQueue[0].then(processQueue);
     } else {
