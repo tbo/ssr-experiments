@@ -1,5 +1,4 @@
-import { render } from '../../src/server/jsx';
-import Page from './page';
+import Page, { render } from './page';
 
 const executeBenchmark = () => render(Page, {});
 
