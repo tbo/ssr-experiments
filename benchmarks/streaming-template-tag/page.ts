@@ -1,14 +1,14 @@
 import classNames from 'classnames';
 import { stringify } from 'querystring';
 import getProducts from '../get-products';
-import { Readable } from 'stream';
+import { Readable, PassThrough } from 'stream';
 
 const getRange = (to: number) => [...Array(to).keys()];
 
 const getQuery = (params: Record<string, string | number>) =>
   stringify(Object.fromEntries(Object.entries(params).filter(([, value]) => value)));
 
-const html = (literalSections: any, ...substs: any[]) => {
+export const html = (literalSections: any, ...substs: any[]) => {
   const raw = literalSections.raw;
   const result = [];
   for (let i = 0; i < substs.length; i++) {
@@ -24,32 +24,29 @@ const html = (literalSections: any, ...substs: any[]) => {
   return result;
 };
 
-class TemplateReadable extends Readable {
-  buffer = '';
-  done = false;
-  constructor(component: any[] | Promise<any[]>) {
-    super({});
-    this.init(component);
-  }
-
-  async init(component: any[] | Promise<any[]>) {
+export const render = (component: any[] | Promise<any[]>) => {
+  // const sink = new PassThrough({});
+  // setImmediate(async () => {
+  //   const list = (await component).filter(Boolean);
+  //   let next: any;
+  //   while ((next = await list.shift()) != null) {
+  //     sink.write(String(next));
+  //   }
+  //   sink.end();
+  // });
+  // return sink;
+  const sink = new PassThrough({});
+  setImmediate(async () => {
     const list = await component;
+    let buffer = '';
     for (const item of list) {
-      this.buffer += item;
+      buffer += await item;
     }
-    this.done = true;
-  }
-  _read() {
-    if (this.done && !this.buffer.length) {
-      this.push(null);
-    } else {
-      this.push(this.buffer);
-      this.buffer = '';
-    }
-  }
-}
-
-export const render = (component: any[] | Promise<any[]>, context: any) => new TemplateReadable(component);
+    sink.write(buffer);
+    sink.end();
+  });
+  return sink;
+};
 
 const Base = (contents: any) => html`
   <html lang="en">
