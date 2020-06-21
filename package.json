@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "dev": "TSC_WATCHFILE=UseFsEvents ts-node-dev --no-notify --inspect -- src/server",
+    "wasm-dev": "cd wasm-html && watch 'wasm-pack build --target nodejs' ./src/",
     "benchmark": "NODE_ENV=production ts-node -T -- benchmarks/index.ts",
     "test": "jest"
   },
