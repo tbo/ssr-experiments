@@ -8,11 +8,11 @@ import streamingTemplateTagBenchmark from './streaming-template-tag';
 
 const SAMPLES = 1000;
 
-// const toString = async (stream: Readable) => {
-//   let buffer = '';
-//   stream.on('data', (data: string) => (buffer += data.toString()));
-//   return new Promise((resolve) => stream.on('end', () => resolve(buffer)));
-// };
+const toString = async (stream: Readable) => {
+  let buffer = '';
+  stream.on('data', (data: string) => (buffer += data.toString()));
+  return new Promise((resolve) => stream.on('end', () => resolve(buffer)));
+};
 
 const formatNumber = (input: number) => String(input.toFixed(2)).padStart(6);
 const printStats = (label: string, timings: number[]) => {
@@ -26,9 +26,6 @@ const executeBenchmark = async (label: string, benchmark: () => Promise<Readable
   const timeToFirstByte = [];
   const timeToLastByte = [];
 
-  for (let i = 1; i <= 100; i++) {
-    await benchmark();
-  }
   for (let i = 1; i <= SAMPLES; i++) {
     const start = performance.now();
     const response = await benchmark();

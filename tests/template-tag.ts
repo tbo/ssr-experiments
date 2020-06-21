@@ -37,6 +37,9 @@ describe('Template tag', () => {
     await expectJSXtoMatchSnapshot(() => html`another ${html`template tag`}`);
   });
 
+  test('Render embedded list', async () => {
+    await expectJSXtoMatchSnapshot(() => html`another ${['Hello', '<b>World</b>']}`);
+  });
   test('Render embedded async template tag', async () => {
     await expectJSXtoMatchSnapshot(() => html`another async ${Promise.resolve(html`template tag`)}`);
   });

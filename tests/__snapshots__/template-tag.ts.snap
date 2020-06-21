@@ -8,6 +8,8 @@ exports[`Template tag Render embedded async string 1`] = `"async test"`;
 
 exports[`Template tag Render embedded async template tag 1`] = `"another async template tag"`;
 
+exports[`Template tag Render embedded list 1`] = `"another Hello&lt;b&gt;World&lt;/b&gt;"`;
+
 exports[`Template tag Render embedded template tag 1`] = `"another template tag"`;
 
 exports[`Template tag Render simple template tag 1`] = `"test"`;
