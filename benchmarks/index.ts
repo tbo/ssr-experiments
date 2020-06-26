@@ -5,6 +5,7 @@ import reactBenchmark from './react';
 import simpleTemplateTagBenchmark from './simple-template-tag';
 import advancedTemplateTagBenchmark from './advanced-template-tag';
 import streamingTemplateTagBenchmark from './streaming-template-tag';
+import simpleWasm from './simple-wasm';
 
 const SAMPLES = 1000;
 
@@ -49,6 +50,7 @@ const executeBenchmarks = async () => {
   await executeBenchmark('Simple Template Tag', simpleTemplateTagBenchmark);
   await executeBenchmark('Advanced Template Tag', advancedTemplateTagBenchmark);
   await executeBenchmark('Streaming Template Tag', streamingTemplateTagBenchmark);
+  await executeBenchmark('Simple WASM Template Tag', simpleWasm);
 };
 
 executeBenchmarks();

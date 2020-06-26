@@ -1,72 +1,13 @@
 import classNames from 'classnames';
 import { stringify } from 'querystring';
-import getProducts from '../get-products';
-import { PassThrough } from 'stream';
+import { html } from '../../wasm-html/pkg';
 
 const getRange = (to: number) => [...Array(to).keys()];
 
 const getQuery = (params: Record<string, string | number>) =>
   stringify(Object.fromEntries(Object.entries(params).filter(([, value]) => value)));
 
-const whitespace = /(\s{2,}|\r\n|\n|\r)/g;
-
-const htmlEscape = (value: any) =>
-  typeof value !== 'string'
-    ? value
-    : value
-        .replace(/&/g, '&amp;')
-        .replace(/>/g, '&gt;')
-        .replace(/</g, '&lt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#39;')
-        .replace(/`/g, '&#96;');
-
-const cache = new Map();
-
-export const html = (literalSections: any, ...substs: any[]) => {
-  let raw = cache.get(literalSections);
-  if (!raw) {
-    raw = literalSections.raw.map((item: any) => item.replace(whitespace, ''));
-    cache.set(literalSections, raw);
-  }
-  const result = [];
-  for (let i = 0; i < substs.length; i++) {
-    const subst = substs[i];
-    result.push(raw[i]);
-    if (Array.isArray(subst)) {
-      if ((subst as any).__internal) {
-        result.push(...subst.flat());
-      } else {
-        result.push(...subst.flatMap(htmlEscape));
-      }
-    } else {
-      result.push(htmlEscape(subst));
-    }
-  }
-  result.push(raw[raw.length - 1]);
-  (result as any).__internal = true;
-  return result;
-};
-
-export const render = (component: any[] | Promise<any[]>) => {
-  const sink = new PassThrough({});
-  setImmediate(async () => {
-    const list = await component;
-    let buffer = '';
-    for (const item of list) {
-      if (buffer.length > 1024) {
-        sink.write(buffer);
-        buffer = '';
-      }
-      buffer += await item;
-    }
-    sink.write(buffer);
-    sink.end();
-  });
-  return sink;
-};
-
-const Base = (contents: any) => html`
+const Base = (contents: any) => (html as any)`
   <html lang="en">
     <head>
       <meta charset="utf-8" />
@@ -104,7 +45,7 @@ const Base = (contents: any) => html`
   </html>
 `;
 
-const getProductTile = ({ id, name, price, description, image }: any) => html`
+const getProductTile = ({ id, name, price, description, image }: any) => (html as any)`
   <div id="${id}" className="card blue-grey darken-1 hit">
     <div className="card-content white-text">
       <span className="card-title">${name}</span>
@@ -120,7 +61,7 @@ const getProductTile = ({ id, name, price, description, image }: any) => html`
   </div>
 `;
 
-const getPaginationEntry = (activePage: number, query: string) => (page: number) => html`
+const getPaginationEntry = (activePage: number, query: string) => (page: number) => (html as any)`
   <li className="${classNames('waves-effect', { active: activePage === page })}>
     <a href="?${getQuery({ query, page })}">${page + 1}</a>
   </li>
@@ -130,18 +71,17 @@ const getPagination = (total: number, activePage: number, query: string) => {
   if (!total) {
     return '';
   }
-  return html`
+  return (html as any)`
     <ul className="pagination">
       ${getRange(total).map(getPaginationEntry(activePage, query))}
     </ul>
   `;
 };
 
-const Page = async () => {
-  const products = await getProducts();
+const Page = (products: any) => {
   const query = 'table';
   const { nbHits, nbPages, hits, page: activePage } = products;
-  return Base(html`
+  return Base((html as any)`
       <p>
         <div className="chip">Hits: ${nbHits}</div>
       </p>
