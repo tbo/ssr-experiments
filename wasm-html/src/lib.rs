@@ -1,6 +1,6 @@
 mod utils;
 
-use js_sys::{Array, Reflect};
+use js_sys::{Array, Number, Reflect};
 use wasm_bindgen::prelude::*;
 
 // When the `wee_alloc` feature is enabled, use `wee_alloc` as the global
@@ -9,9 +9,9 @@ use wasm_bindgen::prelude::*;
 #[global_allocator]
 static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
 
-macro_rules! console_log {
-    ($($t:tt)*) => (log(&format_args!($($t)*).to_string()))
-}
+// macro_rules! console_log {
+//     ($($t:tt)*) => (log(&format_args!($($t)*).to_string()))
+// }
 
 #[wasm_bindgen]
 extern "C" {
@@ -80,5 +80,20 @@ pub fn html(
     // });
     // let test: TemplateStringsArray = call_site;
     // console::log_1(&"Hello world".into());
+    return result;
+}
+#[wasm_bindgen]
+pub fn render(input: Vec<JsValue>) -> String {
+    let mut result = String::new();
+    for item in input {
+        if let Some(text) = item.as_string() {
+            result.push_str(&text);
+        } else if let Some(num) = item.as_f64() {
+            result.push_str(&num.to_string());
+        } else if Array::is_array(&item) {
+            let arr = Array::from(&item);
+            result.push_str(&render(arr.to_vec()));
+        }
+    }
     return result;
 }
