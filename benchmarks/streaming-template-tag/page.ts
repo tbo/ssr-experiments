@@ -24,6 +24,7 @@ const htmlEscape = (value: any) =>
 const cache = new Map();
 
 export const html = (literalSections: any, ...substs: any[]) => {
+  console.dir(Array.isArray(literalSections.raw));
   let raw = cache.get(literalSections);
   if (!raw) {
     raw = literalSections.raw.map((item: any) => item.replace(whitespace, ''));

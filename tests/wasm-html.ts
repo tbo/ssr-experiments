@@ -1,7 +1,7 @@
-import { fibonacci } from '../wasm-html/pkg';
+import { html } from '../wasm-html/pkg';
 
 describe('Template tag', () => {
   test('simple', async () => {
-    console.log(fibonacci(10));
+    console.log((html as any)`thomas ${123} test ${456}`);
   });
 });
