@@ -17,13 +17,6 @@ static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
 extern "C" {
     #[wasm_bindgen(js_namespace = console)]
     fn log(s: &str);
-
-    fn alert(s: &str);
-
-// pub type Quacks;
-
-// #[wasm_bindgen(structural, method)]
-// pub fn raw(this: &Quacks) -> [str];
 }
 
 #[wasm_bindgen]
@@ -72,14 +65,6 @@ pub fn html(
             }
         }
     }
-    // raw.for_each(&mut |x, i, _| {
-    //     result.push(x);
-    //     if let Some(substitution) = substitutions.get_mut(i as usize) {
-    //         // result.push(substitution);
-    //     }
-    // });
-    // let test: TemplateStringsArray = call_site;
-    // console::log_1(&"Hello world".into());
     return result;
 }
 #[wasm_bindgen]
