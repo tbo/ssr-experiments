@@ -1,5 +1,5 @@
 {
-  "name": "nodejs-hpa",
+  "name": "ssr-experiments",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
@@ -11,7 +11,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/tbo/nodejs-hpa.git"
+    "url": "git+https://github.com/tbo/ssr-experiments.git"
   },
   "author": "Thomas Bonk",
   "license": "MIT",
